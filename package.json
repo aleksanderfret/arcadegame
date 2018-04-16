@@ -1,0 +1,39 @@
+{
+  "name": "arcadegame",
+  "version": "1.0.0",
+  "description": "frontend-nanodegree-arcade-game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alemikolo/arcadegame.git"
+  },
+  "author": "Aleksander Fret",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alemikolo/arcadegame/issues"
+  },
+  "homepage": "https://github.com/alemikolo/arcadegame#readme",
+  "browserslist": [
+    "since 2015",
+    "IE > 8"
+  ],
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "browser-sync": "^2.23.6",
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
+    "gulp-autoprefixer": "^5.0.0",
+    "gulp-babel": "^7.0.1",
+    "gulp-clean-css": "^3.9.3",
+    "gulp-concat": "^2.6.1",
+    "gulp-html-replace": "^1.6.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^4.0.1",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify-es": "^1.0.1"
+  }
+}
