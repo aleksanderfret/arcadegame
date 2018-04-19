@@ -32,21 +32,27 @@ class GameEntity {
 
 // Enemies our player must avoid
 class Enemy extends GameEntity{
-  constructor() {
+  constructor(startEdge = 'left') {
     super();
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.x = -101;
     this.y = 63 + (Math.floor(Math.random() * 3))*83;
     this.innerLeft = 0;
     this.innerRight = 101;
     this.innerTop = 74;
     this.innerBottom = 146;
+    this.startEdge = startEdge;
     this.speed = (Math.floor(Math.random() * 71))+30;
-    this.sprite = 'img/enemy-bug.png';
+    if(this.startEdge === 'left') {
+      this.sprite = 'img/enemy-bug.png';
+      this.x = -101;
+    } else {
+      this.sprite = 'img/enemy-bug2.png';
+      this.x = 707;
+    }
   }
 
   // Update the enemy's position, required method for game
@@ -55,11 +61,20 @@ class Enemy extends GameEntity{
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    if (this.x < 606) {
-      this.x += this.speed*dt;
+    if (this.startEdge === 'left') {
+      if (this.x < 606) {
+        this.x += this.speed*dt;
+      } else {
+        this.x = -101;
+      }
     } else {
-      this.x = -101;
+      if (this.x > -101) {
+        this.x -= this.speed*dt;
+      } else {
+        this.x = 707;
+      }
     }
+
   }
 
   // Draw the enemy on the screen, required method for game
@@ -78,7 +93,7 @@ class Enemy extends GameEntity{
 // a handleInput() method.
 
 class Player extends GameEntity{
-  constructor() {
+  constructor(sprite) {
     super();
     this.reset();
     this.minX = 0;
@@ -87,11 +102,11 @@ class Player extends GameEntity{
     this.maxY = 405;
     this.stepY = 83;
     this.stepX = 101;
-    this.sprite = 'img/char-boy.png';
-    this.innerLeft = 10;
-    this.innerRight = 91;
+    this.innerLeft = 20;
+    this.innerRight = 81;
     this.innerTop = 60;
     this.innerBottom = 143;
+    this.sprite = sprite;
   }
 
   reset() {
@@ -134,14 +149,60 @@ class Player extends GameEntity{
     }
   }
 }
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+
+class Game {
+  constructor() {
+  }
+
+  getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  calculateEnemiesNumber(level) {
+    const enemiesInterval = [];
+    let min = 3;
+    let max;
+    if (level === 1) {
+      max = 3;
+    } else if (level <=4) {
+      max = (level<4) ? 3 : 4;
+    } else if (level <=8) {
+      min = 4;
+      max = this.getRandomInt(min, level);
+    } else if (level <=12) {
+      min = 6;
+      max = this.getRandomInt(min, level-2);
+    }
+    enemiesInterval.push(min, max);
+    return enemiesInterval;
+  }
+
+  createEnemies(level){
+    const enemies = [];
+    let oppositeBugs;
+    const enemiesInterval = this.calculateEnemiesNumber(level);
+    const enemiesNum = this.getRandomInt(enemiesInterval[0], enemiesInterval[1]);
+    if (enemiesNum >= 5) {
+      oppositeBugs = this.getRandomInt(2, Math.floor(enemiesNum/2));
+    }
+    for(let i=1; i<=enemiesNum; i++) {
+      if(oppositeBugs && i<=oppositeBugs) {
+        enemies.push(new Enemy('right'));
+      } else {
+        enemies.push(new Enemy());
+      }
+    }
+    return enemies;
+  }
+
 }
+
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-let allEnemies = [new Enemy(),new Enemy(),new Enemy(),];
-const player = new Player();
+const game = new Game();
+let allEnemies = game.createEnemies(7);
+const player = new Player('img/char-boy.png');
 
 
 // This listens for key presses and sends the keys to your
