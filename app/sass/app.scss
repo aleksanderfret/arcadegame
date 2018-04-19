@@ -1,0 +1,36 @@
+@import "partials/variables";
+
+body {
+    text-align: center;
+    font: normal normal 300 em($text-size) $text-font;
+    color: $text-color;
+}
+
+.backdrop {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background-color: $backdrop-color;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.end-modal {
+  position: relative;
+  width: 50%;
+  max-width: 800px;
+  background-color: $modal-bg-color;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 5%;
+  text-align: center;
+  overflow: auto;
+  box-shadow: 0 0 10px 0 $shadow-color;
+  font-size: 1.2rem;
+}
