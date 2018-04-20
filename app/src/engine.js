@@ -79,13 +79,12 @@ var Engine = (function (global) {
    */
   function update(dt) {
     updateEntities(dt);
-    if (!player.isDead && checkCollision()) {
-      player.die();
-      allEnemies.forEach((enemy) => { enemy.stop(); });
-      setTimeout(resetRound, 500);
-    } else if (checkGoal()) {
-      allEnemies.forEach((enemy) => { enemy.stop(); });
-      setTimeout(resetRound, 500);
+    if(!game.lock){
+      if (checkCollision()) {
+        game.loseGame();
+      } else if (checkGoal()) {
+        game.winGame();
+      }
     }
   }
 
@@ -107,10 +106,7 @@ var Engine = (function (global) {
     }
   }
 
-  function resetRound() {
-    allEnemies = [new Enemy(), new Enemy(), new Enemy(), ];
-    player.reset();
-  }
+
 
   /* This is called by the update function and loops through all of the
    * objects within your allEnemies array as defined in app.js and calls
