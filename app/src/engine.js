@@ -136,24 +136,25 @@ var Engine = (function (global) {
         ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
       }
     }
-
-    renderEntities();
+    gameUI.render();
+    game.render();
+    //renderEntities();
   }
 
   /* This function is called by the render function and is called on each game
    * tick. Its purpose is to then call the render functions you have defined
    * on your enemy and player entities within app.js
    */
-  function renderEntities() {
-    /* Loop through all of the objects within the allEnemies array and call
-     * the render function you have defined.
-     */
-    allEnemies.forEach(function (enemy) {
-      enemy.render();
-    });
+  // function renderEntities() {
+  //   /* Loop through all of the objects within the allEnemies array and call
+  //    * the render function you have defined.
+  //    */
+  //   allEnemies.forEach(function (enemy) {
+  //     enemy.render();
+  //   });
 
-    player.render();
-  }
+  //   player.render();
+  // }
 
   /* This function does nothing but it could have been a good place to
    * handle game reset states - maybe a new game menu or a game over screen

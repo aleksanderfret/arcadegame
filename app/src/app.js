@@ -160,9 +160,9 @@ class Game {
   constructor() {
     this.maxLevel = 12;
     this.lock = false;
-    this.winModal = document.querySelector('.win-backdrop');
-    this.loseModal =  document.querySelector('.lose-backdrop')
-    this.startModal = document.querySelector('.start-backdrop');
+    this.enemies = [];
+    this.createEnemies(level.getLevel());
+    console.log(this.enemies);
   }
 
   getRandomInt(min, max) {
@@ -170,7 +170,7 @@ class Game {
   }
 
   calculateEnemiesNumber(level) {
-    const enemiesNumberInterval = [];
+    const enemiesNumberRange = [];
     let min;
     let max;
     if (level <= 2) {
@@ -178,19 +178,22 @@ class Game {
       max = 3;
     } else if (level <=4) {
       min = 4;
-      max = (level < 4 ) ? 4 : 5;
+      max = 5;
     } else if (level <=6) {
       min = 5;
-      max = this.getRandomInt(min, level+1);
+      max = 7;
     } else if (level <=8) {
       min = 6;
-      max = this.getRandomInt(min, level+1);
-    } else {
+      max = 8;
+    } else if (level <=10) {
       min = 7;
-      max = this.getRandomInt(min, level);
+      max = 10;
+    } else {
+      min = 8;
+      max = 12;
     }
-    enemiesNumberInterval.push(min, max);
-    return enemiesNumberInterval;
+    enemiesNumberRange.push(min, max);
+    return enemiesNumberRange;
   }
 
   calculateEnemiesSpeed(level){
@@ -219,38 +222,38 @@ class Game {
     enemiesSpeedRange.push(min, max);
     return enemiesSpeedRange;
   }
-
   createEnemies(level){
-    const enemies = [];
-    let oppositeBugs;
-    let enemyTrack;
-    const enemiesNumberInterval = this.calculateEnemiesNumber(level);
+
+    const createdEnemies = [];
+    const enemiesNumberRange = this.calculateEnemiesNumber(level);
     const enemiesSpeedRange = this.calculateEnemiesSpeed(level);
-    const enemiesNum = this.getRandomInt(enemiesNumberInterval[0], enemiesNumberInterval[1]);
+    const enemiesNum = this.getRandomInt(enemiesNumberRange[0], enemiesNumberRange[1]);
+    const newEnemiesNum = enemiesNum - this.enemies.length;
+    let isOppositeEnemy = 0;
+    let enemyTrack;
     let enemySpeed;
-    if (enemiesNum >= 5) {
-      oppositeBugs = this.getRandomInt(2, Math.floor(enemiesNum/2));
-    }
-    for(let i=1; i<=enemiesNum; i++) {
+    for(let i=1; i<=newEnemiesNum; i++) {
+      if (this.enemies.length >= 4) {
+        isOppositeEnemy = this.getRandomInt(0, 1);
+      }
       enemySpeed = this.getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
-      if(i<=3){
+
+      if(this.enemies.length === 0 && i <= 3){
         enemyTrack = i;
       } else {
         enemyTrack = this.getRandomInt(1, 3);
       }
-      console.log(enemyTrack);
-      if(oppositeBugs && i<=oppositeBugs) {
-        enemies.push(new Enemy(enemyTrack, enemySpeed,'right'));
-      } else {
-        enemies.push(new Enemy(enemyTrack, enemySpeed));
-      }
+
+      const startEdge = isOppositeEnemy ? 'right' : 'left';
+      createdEnemies.push(new Enemy(enemyTrack, enemySpeed, startEdge));
     }
-    console.log(enemies);
-    return enemies;
+    console.log(createdEnemies);
+    this.enemies.push(...createdEnemies);
+
   }
 
   increaseLevel(){
-    allEnemies.forEach((enemy) => { enemy.stop(); });
+    //this.enemies.forEach((enemy) => { enemy.stop(); });
     this.lock = true;
     level.update();
     this.resetRound();
@@ -258,7 +261,7 @@ class Game {
 
   loseGame(){
     player.die();
-    allEnemies.forEach((enemy) => { enemy.stop(); });
+    //this.enemies.forEach((enemy) => { enemy.stop(); });
     this.lock = true;
     //this.loseModal.classList.add('show-modal');
     this.resetRound();
@@ -280,20 +283,30 @@ class Game {
       }
     }
   }
+  render() {
+    this.renderEntities();
+  }
+  renderEntities() {
+    this.enemies.forEach(function (enemy) {
+      enemy.render();
+    });
+    player.render();
+  }
+
   winGame(){
     console.log('win');
     //this.winModal.classList.add('show-modal');
   }
 
   updateEntities(dt) {
-    allEnemies.forEach(function (enemy) {
+    this.enemies.forEach(function (enemy) {
       enemy.update(dt);
     });
     player.update();
   }
 
   checkCollision() {
-    for(const enemy of allEnemies){
+    for(const enemy of this.enemies){
       if (player.getEdge('left') <= enemy.getEdge('right')
         && player.getEdge('right') >= enemy.getEdge('left')
         && player.getEdge('top') <= enemy.getEdge('bottom')
@@ -311,7 +324,7 @@ class Game {
   }
   resetRound() {
     setTimeout(() => {
-      allEnemies = game.createEnemies(level.getLevel());
+      game.createEnemies(level.getLevel());
       player.reset();
       this.lock = false;
     }, 500);
@@ -333,13 +346,30 @@ class Level {
   }
 }
 
+class GameUI {
+  constructor(){
+    const winModal = document.querySelector('.win-backdrop');
+    const loseModal =  document.querySelector('.lose-backdrop')
+    const startModal = document.querySelector('.start-backdrop');
+    const levelUI = document.querySelector('.level');
+    const timeUI = document.querySelector('.time');
+    const pointsUI = document.querySelector('.points');
+  }
+  render(){
+    ctx.font = "20px Ubuntu";
+    ctx.fillStyle = "white";
+    ctx.fillText(`Level ${level.getLevel()}/12`,10,40);
+  }
+}
+
 // Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
+// Place all enemy objects in an array called this.enemies
 // Place the player object in a variable called player
-const game = new Game();
 const level = new Level();
-let allEnemies = game.createEnemies(level.getLevel());
+const game = new Game();
+//let this.enemies = game.createEnemies(level.getLevel());
 const player = new Player('img/char-boy.png');
+const gameUI = new GameUI();
 
 
 // This listens for key presses and sends the keys to your
