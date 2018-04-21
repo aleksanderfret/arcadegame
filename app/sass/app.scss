@@ -4,6 +4,7 @@ body {
     text-align: center;
     font: normal normal 300 em($text-size) $text-font;
     color: $text-color;
+    background-color: $background-color;
 }
 
 .backdrop {
