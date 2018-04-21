@@ -20,7 +20,7 @@ const htmlreplace = require('gulp-html-replace');
 gulp.task('default', function(done){
   gulp.watch('./app/sass/**/*.scss', gulp.series('styles'));
   gulp.watch('./app/src/**/*.js', gulp.series('js'));
-  gulp.watch('.app/index.html', gulp.series('html'));
+  gulp.watch('./app/index.html', gulp.series('html'));
   browserSync.init({
     server: "./app"
   });
@@ -54,12 +54,8 @@ gulp.task('js', (done) => {
     gulp.src('./app/index.html')
     .pipe(htmlreplace({
       'js': 'js/main.min.js'
-    }));
-    done();
-  });
-
-  gulp.task('images', (done) => {
-    gulp.src();
+    }))
+    .pipe(browserSync.stream());
     done();
   });
 
