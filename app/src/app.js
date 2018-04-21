@@ -2,33 +2,19 @@ class GameEntity {
   constructor() {
     this.x;
     this.y;
-    this.innerLeft;
-    this.innerRight;
-    this.innerTop;
-    this.innerBottom;
-    this.verticalStep = 83;
-    this.horizontalStep = 101;
+    this.stepY = 83;
+    this.stepX = 101;
+    this.edges = {
+      left: 0,
+      right: 101,
+      top: 0,
+      bottom: 171
+    }
   }
 
   getEdge(edge){
-    let edgeValue;
-    switch(edge) {
-      case 'left':
-        edgeValue = this.x + this.innerLeft;
-        break;
-      case 'right':
-        edgeValue = this.x + this.innerRight;
-        break;
-      case 'top':
-        edgeValue = this.y + this.innerTop;
-        break;
-      case 'bottom':
-        edgeValue = this.y + this.innerBottom;
-        break;
-      default:
-        null;
-    }
-    return edgeValue;
+    const coord = (['left','right'].includes(edge)) ? 'x' : 'y';
+    return this[coord] + this.edges[edge];
   }
 }
 
@@ -41,13 +27,15 @@ class Enemy extends GameEntity{
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.innerLeft = 0;
-    this.innerRight = 101;
-    this.innerTop = 74;
-    this.innerBottom = 146;
-    this.startEdge = startEdge;;
+    this.edges = {
+      left: 0,
+      right: 101,
+      top: 74,
+      bottom: 146
+    }
+    this.startEdge = startEdge;
     this.speed = speed;
-    this.setStartPosition(startEdge, track);
+    this.setStartPosition(this.startEdge, track);
   }
 
   // Update the enemy's position, required method for game
@@ -69,7 +57,6 @@ class Enemy extends GameEntity{
         this.x = 707;
       }
     }
-
   }
 
   // Draw the enemy on the screen, required method for game
@@ -95,15 +82,14 @@ class Enemy extends GameEntity{
         this.y = initialPosition;
         break;
       case 2:
-        this.y = initialPosition + this.verticalStep;
+        this.y = initialPosition + this.stepY;
         break;
       case 3:
-        this.y = initialPosition + this.verticalStep*2;
+        this.y = initialPosition + this.stepY*2;
         break;
       default:
         null;
     }
-
   }
 }
 
@@ -120,12 +106,12 @@ class Player extends GameEntity{
     this.minY = -10;
     this.maxX = 404;
     this.maxY = 405;
-    this.stepY = 83;
-    this.stepX = 101;
-    this.innerLeft = 20;
-    this.innerRight = 81;
-    this.innerTop = 60;
-    this.innerBottom = 143;
+    this.edges = {
+      left: 20,
+      right: 81,
+      top: 60,
+      bottom: 143
+    }
     this.sprite = sprite;
   }
 
@@ -172,6 +158,7 @@ class Player extends GameEntity{
 
 class Game {
   constructor() {
+    this.maxLevel = 12;
     this.lock = false;
     this.winModal = document.querySelector('.win-backdrop');
     this.loseModal =  document.querySelector('.lose-backdrop')
@@ -205,10 +192,9 @@ class Game {
     enemiesNumberInterval.push(min, max);
     return enemiesNumberInterval;
   }
-  //this.speed = (Math.floor(Math.random() * 71))+30;
 
   calculateEnemiesSpeed(level){
-    const enemiesSpeedInterval = [];
+    const enemiesSpeedRange = [];
     let min;
     let max;
     if(level <= 2) {
@@ -229,44 +215,47 @@ class Game {
     } else {
       min = 80;
       max = 300;
+    }
+    enemiesSpeedRange.push(min, max);
+    return enemiesSpeedRange;
   }
-    enemiesSpeedInterval.push(min, max);
-    return enemiesSpeedInterval;
 
-  }
   createEnemies(level){
     const enemies = [];
     let oppositeBugs;
     let enemyTrack;
     const enemiesNumberInterval = this.calculateEnemiesNumber(level);
-    const enemiesSpeedInterval = this.calculateEnemiesSpeed(level);
+    const enemiesSpeedRange = this.calculateEnemiesSpeed(level);
     const enemiesNum = this.getRandomInt(enemiesNumberInterval[0], enemiesNumberInterval[1]);
     let enemySpeed;
     if (enemiesNum >= 5) {
       oppositeBugs = this.getRandomInt(2, Math.floor(enemiesNum/2));
     }
     for(let i=1; i<=enemiesNum; i++) {
-      enemySpeed = this.getRandomInt(enemiesSpeedInterval[0], enemiesSpeedInterval[1]);
+      enemySpeed = this.getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
       if(i<=3){
         enemyTrack = i;
       } else {
         enemyTrack = this.getRandomInt(1, 3);
       }
+      console.log(enemyTrack);
       if(oppositeBugs && i<=oppositeBugs) {
         enemies.push(new Enemy(enemyTrack, enemySpeed,'right'));
       } else {
         enemies.push(new Enemy(enemyTrack, enemySpeed));
       }
     }
+    console.log(enemies);
     return enemies;
   }
-  winGame(){
+
+  increaseLevel(){
     allEnemies.forEach((enemy) => { enemy.stop(); });
     this.lock = true;
     level.update();
-    //this.winModal.classList.add('show-modal');
     this.resetRound();
   }
+
   loseGame(){
     player.die();
     allEnemies.forEach((enemy) => { enemy.stop(); });
@@ -277,8 +266,48 @@ class Game {
   startGame(){
 
   }
-  checkCollision(){
+  update(dt) {
+    this.updateEntities(dt);
+    if(!this.lock) {
+      if (this.checkCollision()) {
+        this.loseGame();
+      } else if (this.checkGoal()) {
+        if(level.getLevel() === this.maxLevel) {
+          this.winGame();
+        } else {
+          this.increaseLevel();
+        }
+      }
+    }
+  }
+  winGame(){
+    console.log('win');
+    //this.winModal.classList.add('show-modal');
+  }
 
+  updateEntities(dt) {
+    allEnemies.forEach(function (enemy) {
+      enemy.update(dt);
+    });
+    player.update();
+  }
+
+  checkCollision() {
+    for(const enemy of allEnemies){
+      if (player.getEdge('left') <= enemy.getEdge('right')
+        && player.getEdge('right') >= enemy.getEdge('left')
+        && player.getEdge('top') <= enemy.getEdge('bottom')
+        && player.getEdge('bottom') >= enemy.getEdge('top')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkGoal() {
+    if (player.y == player.minY) {
+      return true;
+    }
   }
   resetRound() {
     setTimeout(() => {

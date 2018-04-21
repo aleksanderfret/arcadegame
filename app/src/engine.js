@@ -78,35 +78,8 @@ var Engine = (function (global) {
    * on the entities themselves within your app.js file).
    */
   function update(dt) {
-    updateEntities(dt);
-    if(!game.lock){
-      if (checkCollision()) {
-        game.loseGame();
-      } else if (checkGoal()) {
-        game.winGame();
-      }
-    }
+    game.update(dt);
   }
-
-  function checkCollision() {
-    for(const enemy of allEnemies){
-      if (player.getEdge('left') <= enemy.getEdge('right')
-        && player.getEdge('right') >= enemy.getEdge('left')
-        && player.getEdge('top') <= enemy.getEdge('bottom')
-        && player.getEdge('bottom') >= enemy.getEdge('top')) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function checkGoal() {
-    if (player.y == player.minY) {
-      return true;
-    }
-  }
-
-
 
   /* This is called by the update function and loops through all of the
    * objects within your allEnemies array as defined in app.js and calls
@@ -115,12 +88,12 @@ var Engine = (function (global) {
    * the data/properties related to the object. Do your drawing in your
    * render methods.
    */
-  function updateEntities(dt) {
-    allEnemies.forEach(function (enemy) {
-      enemy.update(dt);
-    });
-    player.update();
-  }
+  // function updateEntities(dt) {
+  //   allEnemies.forEach(function (enemy) {
+  //     enemy.update(dt);
+  //   });
+  //   player.update();
+  // }
 
   /* This function initially draws the "game level", it will then call
    * the renderEntities function. Remember, this function is called every
