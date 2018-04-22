@@ -10,21 +10,41 @@
 </head>
 
 <body>
-  <div class="backdrop win-backdrop">
-    <div class="win-modal">Wygrana</div>
+  <div class="backdrop">
+    <div class="modal">
+      <h1 class="message"></h1>
+      <ul class="game-result">
+        <li>Game level:
+          <span class="level-result"></span>
+        </li>
+        <li>Lives:
+            <span class="lives-result"></span>
+          </li>
+        <li>Play again:
+          <button id="play-again" class="play-again">
+            <i class="fas fa-gamepad"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
-  <div class="backdrop lose-backdrop">
-    <div class="lose-modal">Przegrana</div>
-  </div>
-  <div class="backdrop  start-backdrop">
-    <div class="start-modal">Opcje, start, help</div>
-  </div>
-  <ul id="panel" class="panel">
-    <li class="item level">level</li>
-    <li class="item lives">lives</li>
-    <li class="item points">points</li>
-    <li class="item time">times</li>
-  </ul>
+  <!-- <div class="backdrop lose-backdrop">
+    <div class="lose-modal">
+      <h1 class="statement">
+        <i class="fas fa-frown"></i>
+        <br>Unfortunately, you lost!</h1>
+      <ul class="game-result">
+        <li>Game level:
+          <span class="level-result"></span>
+        </li>
+        <li>Play again:
+          <button id="play-again" class="play-again">
+            <i class="fas fa-gamepad"></i>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div> -->
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.5.5/core.min.js"></script>
   <!--build:js-->
