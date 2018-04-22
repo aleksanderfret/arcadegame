@@ -136,7 +136,6 @@ var Engine = (function (global) {
         ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
       }
     }
-    gamePanel.render();
     game.render();
     //renderEntities();
   }
@@ -174,7 +173,10 @@ var Engine = (function (global) {
     'img/grass-block.png',
     'img/enemy-bug.png',
     'img/enemy-bug2.png',
-    'img/char-boy.png'
+    'img/char-boy.png',
+    'img/char-boy-dead.png',
+    'img/char-boy-win.png',
+    'img/Heart.png'
   ]);
   Resources.onReady(init);
 
