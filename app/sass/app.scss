@@ -144,6 +144,12 @@ body {
     font: normal normal 300 $text-size $text-font;
 }
 
+.key {
+  display: inline-block;
+  padding: 0 0.5rem;
+  font-weight: $text-weight;
+}
+
 .backdrop {
   display: none;
   position: absolute;
@@ -158,9 +164,6 @@ body {
   align-items: center;
 }
 
-.win-modal,
-.lose-modal,
-.start-modal,
 .modal {
   position: relative;
   width: 50%;
@@ -169,47 +172,78 @@ body {
   color: $modal-txt-color;
   border-radius: 5px;
   box-sizing: border-box;
-  padding: 5%;
+  padding: 3%;
   text-align: center;
   overflow: auto;
   box-shadow: 0 0 10px 0 $shadow-color;
   font-size: 1.2rem;
 }
 
-.message {
+.title {
   line-height: 1.5em;
-  font-size: 1.2em;
-  font-weight: 700;
+  font-size: 1.4em;
+  font-weight: $text-weight;
+}
+.instruction-title {
+  line-height: 1.4rem;
+  font-size: 1.2rem;
+  font-weight: $text-weight;
 }
 
-.game-result li {
-  padding: 1em;
+.game-result li,
+.instruction li {
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.level-result,
-.lives-result {
-  padding-left: 0.5em;
+.instruction li {
+  justify-content: left;
+  text-align: left;
+}
+.game-result .fas,
+.instruction .fas {
+  display: inline-block;
+  padding-right: 0.75rem;
+  font-size: 1.2rem;
 }
 
-.play-again {
-  font-size: 2em;
-  padding: 0.1em;
+.level-result,
+.lives-result {
+  padding-left: 0.5rem;
+}
+
+.play {
+  padding: 0.1rem;
   border: none;
   background: none;
-  padding-left: 0.5em;
+  padding-left: 0.5rem;
   cursor: pointer;
 }
 
-.play-again .fas {
+.play .fas {
+  font-size: 2.5rem;
   transition: all 0.3s;
 }
 
-.play-again:hover .fas {
+.play:hover .fas {
   transform: scale(1.2);
 }
+
+.sprite {
+  display: inline-block;
+  width: 101px;
+  height: 101px;
+  overflow: hidden;
+}
+
+.sprite img {
+  position: relative;
+  display: block;
+  top: -50px;
+}
+
 
 .show-modal {
   display: flex;

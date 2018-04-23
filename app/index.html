@@ -10,42 +10,35 @@
 </head>
 
 <body>
-  <div class="backdrop">
+  <div id="result-modal" class="backdrop">
     <div class="modal">
-      <h1 class="message"></h1>
+      <h1 class="title"></h1>
       <ul class="game-result">
-        <li>Game level:
-          <span class="level-result"></span>
-        </li>
-        <li>Lives:
-            <span class="lives-result"></span>
-          </li>
-        <li>Play again:
-          <button id="play-again" class="play-again">
-            <i class="fas fa-gamepad"></i>
-          </button>
-        </li>
+        <li>Game level: <span class="level-result"></span></li>
+        <li>Lives: <span class="lives-result"></span></li>
+        <li><i class="fas fa-info"></i>Press <span class="key">[space]</span> to change the player or <span class="key">[enter]</span> to start the game.</li>
       </ul>
+      <div class="sprite"><img src="img/char-boy.png"></div>
     </div>
   </div>
-  <!-- <div class="backdrop lose-backdrop">
-    <div class="lose-modal">
-      <h1 class="statement">
-        <i class="fas fa-frown"></i>
-        <br>Unfortunately, you lost!</h1>
-      <ul class="game-result">
-        <li>Game level:
-          <span class="level-result"></span>
-        </li>
-        <li>Play again:
-          <button id="play-again" class="play-again">
-            <i class="fas fa-gamepad"></i>
-          </button>
-        </li>
+  <div id="intro-modal" class="backdrop">
+    <div class="modal intro">
+      <h1 class="title">The Classic Arcade Game</h1>
+      <h2 class="instruction-title">Instructions:</h2>
+      <ul class="instruction">
+        <li><i class="fas fa-info"></i>To move the player use arrow keys.</li>
+        <li><i class="fas fa-info"></i>To win the game the player has to pass the 12th level.</li>
+        <li><i class="fas fa-info"></i>The player needs to find a golden key and reach the water to pass the level.</li>
+        <li><i class="fas fa-info"></i>The player has 3 lives. He looses one after collision with an enemy.</li>
+        <li><i class="fas fa-info"></i>The maximum number of points to get is 10,000.</li>
+        <li><i class="fas fa-info"></i>100 points are added if the player pass the level.</li>
+        <li><i class="fas fa-info"></i>50 points are added for every live not lost by the player.</li>
+        <li><i class="fas fa-info"></i>The player can collect gems of a value 10 (blue), 25 (green), 50 (yellow) to earn additional points.</li>
+        <li><i class="fas fa-info"></i>Press <span class="key">[space]</span> to change the player or <span class="key">[enter]</span> to start the game.</li>
       </ul>
+      <div class="sprite"><img src="img/char-boy.png"></div>
     </div>
-  </div> -->
-
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.5.5/core.min.js"></script>
   <!--build:js-->
   <script src="js/main.js"></script>
