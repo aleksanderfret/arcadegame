@@ -12,6 +12,11 @@ class GameEntity {
     }
   }
 
+  addExtension(string){
+    const exetension = '.png'
+    return string+extension;
+  }
+
   getEdge(edge) {
     const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
     return this[coord] + this.edges[edge];
@@ -119,7 +124,7 @@ class Player extends GameEntity {
         39: 'right',
         40: 'down'
       };
-      this.handleInput(allowedKeys[event.keyCode]);
+      this.movementHandlerInput(allowedKeys[event.keyCode]);
     });
 
   }
@@ -138,24 +143,22 @@ class Player extends GameEntity {
 
   spriteAnimetion(result) {
     let interval;
-    const spriteAnimated = (result === 'win') ? 'img/char-boy-win.png' : 'img/char-boy-dead.png';
-    const spriteNormal = this.sprite;
+    const spriteNormal = this.sprite.normal;
+    const spriteAnimated = (result === 'win') ? this.sprite.win : this.sprite.lose;
     interval = setInterval(() => {
-      console.log('setinterval');
-      this.sprite = (this.sprite === spriteAnimated) ? spriteNormal : spriteAnimated;
+      this.sprite.normal = (this.sprite.normal === spriteAnimated) ? spriteNormal : spriteAnimated;
     }, 100);
     setTimeout(()=> {
-      console.log('clearinterval');
       clearInterval(interval);
-      this.sprite = spriteNormal;
+      this.sprite.normal = spriteNormal;
     }, 750);
   }
 
   render() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    ctx.drawImage(Resources.get(this.sprite.normal), this.x, this.y);
   }
 
-  handleInput(direction) {
+  movementHandlerInput(direction) {
     if (this.isDead) {
       return;
     }
@@ -180,13 +183,12 @@ class Player extends GameEntity {
 
 class Game {
   constructor() {
-    this.level = new Level();
-    this.player = new Player('img/char-boy.png');
-    this.enemies = [];
     this.gamePanel = new GamePanel();
-    this.maxLevel = 4;
-    this.lock = false;
-    this.createEnemies();
+    this.startIntro();
+    this.enemies = [];
+    this.maxLevel = 3;
+    this.isLock = false;
+    this.isStarted = false;
   }
   getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -220,8 +222,10 @@ class Game {
 
   }
   render() {
-    this.renderEntities();
-    this.gamePanel.render(this.level.getLevel(), this.player.getLives());
+    if(this.isStarted){
+      this.renderEntities();
+      this.gamePanel.render(this.level.getLevel(), this.player.getLives());
+    }
   }
   renderEntities() {
     this.enemies.forEach(function (enemy) {
@@ -243,19 +247,22 @@ class Game {
   }
 
   update(dt) {
+    if(!this.isStarted){
+      return;
+    }
     this.updateEntities(dt);
-    if (this.lock) {
+    if (this.isLock) {
       return
     }
     if (this.checkCollision()) {
-      this.lock = true;
+      this.isLock = true;
       if (this.checkIsDaed()) {
         this.loseGame();
       } else {
         this.resetRound();
       }
     } else if (this.checkGoal()) {
-      this.lock = true;
+      this.isLock = true;
       if (this.level.getLevel() === this.maxLevel) {
         this.winGame();
       } else {
@@ -282,22 +289,39 @@ class Game {
     this.enemies.forEach((enemy) => {
       enemy.stop();
     });
-    this.player.spriteAnimetion('win');
+    this.player.spriteAnimetion('lose');
     setTimeout(()=>{
-      this.gamePanel.displayModal(false, this.level.getLevel(), this.player.getLives(), 0, 0);
+      this.gamePanel.displayResultModal(false, this.level.getLevel(), this.player.getLives(), 0, 0);
+      this.stop();
     }, 1000);
+
   }
-  startGame() {}
   winGame() {
     this.enemies.forEach((enemy) => {
       enemy.stop();
     });
     this.player.spriteAnimetion('win');
     setTimeout(()=>{
-      this.gamePanel.displayModal(true, this.level.getLevel(), this.player.getLives(), 0, 0);
+      this.gamePanel.displayResultModal(true, this.level.getLevel(), this.player.getLives(), 0, 0);
+      this.stop();
     }, 1000);
   }
-
+  start(sprite) {
+    this.level = new Level();
+    this.createEnemies();
+    this.player = new Player(sprite);
+    this.isStarted = true;
+    this.isLock = false;
+  }
+  stop() {
+    this.isStarted = false;
+    this.enemies = [];
+    this.player = null;
+    this.level = null;
+  }
+  startIntro(){
+    this.gamePanel.displayIntro();
+  }
 
   checkCollision() {
     for (const enemy of this.enemies) {
@@ -320,7 +344,7 @@ class Game {
     setTimeout(() => {
       this.createEnemies();
       this.player.reset();
-      this.lock = false;
+      this.isLock = false;
     }, 1000);
   }
 }
@@ -398,11 +422,66 @@ class Level {
 
 class GamePanel {
   constructor() {
-    this.modal = document.querySelector('.backdrop');
-    this.message = document.querySelector('.message');
+    this.resultModal = document.querySelector('#result-modal');
+    this.introModal = document.querySelector('#intro-modal');
+    this.title = document.querySelector('.title');
     this.levelResult = document.querySelector('.level-result');
     this.livesResult = document.querySelector('.lives-result');
+    this.spriteImages = document.querySelectorAll('.sprite img');
+    this.spriteIndex = 0;
+    this.sprites = [
+      {
+        normal: 'img/char-boy.png',
+        lose: 'img/char-boy-lose.png',
+        win: 'img/char-boy-win.png',
+      },
+      {
+        normal: 'img/char-cat-girl.png',
+        lose: 'img/char-cat-girl-lose.png',
+        win: 'img/char-cat-girl-win.png',
+      },
+      {
+        normal: 'img/char-horn-girl.png',
+        lose: 'img/char-horn-girl-lose.png',
+        win: 'img/char-horn-girl-win.png',
+      },
+      {
+        normal: 'img/char-pink-girl.png',
+        lose: 'img/char-pink-girl-lose.png',
+        win: 'img/char-pink-girl-win.png',
+      },
+      {
+        normal: 'img/char-princess-girl.png',
+        lose: 'img/char-princess-girl-lose.png',
+        win: 'img/char-princess-girl-win.png',
+      }];
+    this.setSpriteSrc(this.sprites[this.spriteIndex].normal);
+
+    document.addEventListener('keyup', (event) => {
+      const allowedKeys = {
+        32: 'space',
+        13: 'enter'
+      };
+      this.startOptionsHandler(allowedKeys[event.keyCode]);
+    });
   }
+  setSpriteSrc(url){
+    this.spriteImages.forEach((spriteImage)=>{
+      spriteImage.setAttribute('src', url);
+    });
+  }
+  startOptionsHandler(key) {
+    if(key === 'enter') {
+      this.introModal.classList.remove('show-modal');
+      this.resultModal.classList.remove('show-modal');
+      game.start(this.sprites[this.spriteIndex]);
+    } else if (key === 'space') {
+      const index = (this.spriteIndex === this.sprites.length-1) ? 0 : this.spriteIndex+1;
+      this.setSpriteSrc(this.sprites[index].normal);
+      this.spriteIndex = index;
+    }
+  }
+
   render(level, lives) {
     ctx.font = "20px Ubuntu";
     ctx.fillStyle = "white";
@@ -413,12 +492,15 @@ class GamePanel {
       ctx.drawImage(Resources.get('img/Heart.png'), 205+step*i, 0, 30,50);
     }
   }
-  displayModal(success, level, lives, gems, points) {
-    const message = (success) ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
-    this.message.textContent = message;
+  displayResultModal(success, level, lives, gems, points) {
+    const title = (success) ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
+    this.title.textContent = title;
     this.levelResult.textContent = level;
     this.livesResult.textContent = lives;
-    this.modal.classList.add('show-modal');
+    this.resultModal.classList.add('show-modal');
+  }
+  displayIntro(){
+    this.introModal.classList.add('show-modal');
   }
 }
 

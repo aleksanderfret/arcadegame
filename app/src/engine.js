@@ -81,20 +81,6 @@ var Engine = (function (global) {
     game.update(dt);
   }
 
-  /* This is called by the update function and loops through all of the
-   * objects within your allEnemies array as defined in app.js and calls
-   * their update() methods. It will then call the update function for your
-   * player object. These update methods should focus purely on updating
-   * the data/properties related to the object. Do your drawing in your
-   * render methods.
-   */
-  // function updateEntities(dt) {
-  //   allEnemies.forEach(function (enemy) {
-  //     enemy.update(dt);
-  //   });
-  //   player.update();
-  // }
-
   /* This function initially draws the "game level", it will then call
    * the renderEntities function. Remember, this function is called every
    * game tick (or loop of the game engine) because that's how games work -
@@ -137,23 +123,9 @@ var Engine = (function (global) {
       }
     }
     game.render();
-    //renderEntities();
   }
 
-  /* This function is called by the render function and is called on each game
-   * tick. Its purpose is to then call the render functions you have defined
-   * on your enemy and player entities within app.js
-   */
-  // function renderEntities() {
-  //   /* Loop through all of the objects within the allEnemies array and call
-  //    * the render function you have defined.
-  //    */
-  //   allEnemies.forEach(function (enemy) {
-  //     enemy.render();
-  //   });
 
-  //   player.render();
-  // }
 
   /* This function does nothing but it could have been a good place to
    * handle game reset states - maybe a new game menu or a game over screen
@@ -174,12 +146,23 @@ var Engine = (function (global) {
     'img/enemy-bug.png',
     'img/enemy-bug2.png',
     'img/char-boy.png',
-    'img/char-boy-dead.png',
+    'img/char-boy-lose.png',
     'img/char-boy-win.png',
+    'img/char-cat-girl.png',
+    'img/char-cat-girl-lose.png',
+    'img/char-cat-girl-win.png',
+    'img/char-horn-girl.png',
+    'img/char-horn-girl-lose.png',
+    'img/char-horn-girl-win.png',
+    'img/char-pink-girl.png',
+    'img/char-pink-girl-lose.png',
+    'img/char-pink-girl-win.png',
+    'img/char-princess-girl.png',
+    'img/char-princess-girl-lose.png',
+    'img/char-princess-girl-win.png',
     'img/Heart.png'
   ]);
   Resources.onReady(init);
-
   /* Assign the canvas' context object to the global variable (the window
    * object when run in a browser) so that developers can use it more easily
    * from within their app.js files.
