@@ -23,7 +23,6 @@ class GameEntity {
   }
 }
 
-
 class Enemy extends GameEntity {
   constructor(track, speed, startEdge = 'left') {
     super();
@@ -93,8 +92,6 @@ class Enemy extends GameEntity {
   }
 }
 
-
-// This class requires an update()
 class Player extends GameEntity {
   constructor(sprite) {
     super();
@@ -245,7 +242,6 @@ class Game {
     }
     return isDead;
   }
-
   update(dt) {
     if(!this.isStarted){
       return;
@@ -292,7 +288,7 @@ class Game {
     this.player.spriteAnimetion('lose');
     setTimeout(()=>{
       this.gamePanel.displayResultModal(false, this.level.getLevel(), this.player.getLives(), 0, 0);
-      this.stop();
+      this.stopGame();
     }, 1000);
 
   }
@@ -303,24 +299,24 @@ class Game {
     this.player.spriteAnimetion('win');
     setTimeout(()=>{
       this.gamePanel.displayResultModal(true, this.level.getLevel(), this.player.getLives(), 0, 0);
-      this.stop();
+      this.stopGame();
     }, 1000);
   }
-  start(sprite) {
+  startGame(sprite) {
     this.level = new Level();
     this.createEnemies();
     this.player = new Player(sprite);
     this.isStarted = true;
     this.isLock = false;
   }
-  stop() {
+  stopGame() {
     this.isStarted = false;
     this.enemies = [];
     this.player = null;
     this.level = null;
   }
   startIntro(){
-    this.gamePanel.displayIntro();
+    this.gamePanel.displayIntroModal();
   }
 
   checkCollision() {
@@ -456,14 +452,14 @@ class GamePanel {
         win: 'img/char-princess-girl-win.png',
       }];
     this.setSpriteSrc(this.sprites[this.spriteIndex].normal);
-
-    document.addEventListener('keyup', (event) => {
+    this.modalKeyHandler = (event) => {
       const allowedKeys = {
         32: 'space',
         13: 'enter'
       };
       this.startOptionsHandler(allowedKeys[event.keyCode]);
-    });
+    }
+
   }
   setSpriteSrc(url){
     this.spriteImages.forEach((spriteImage)=>{
@@ -472,9 +468,8 @@ class GamePanel {
   }
   startOptionsHandler(key) {
     if(key === 'enter') {
-      this.introModal.classList.remove('show-modal');
-      this.resultModal.classList.remove('show-modal');
-      game.start(this.sprites[this.spriteIndex]);
+      this.closeModal();
+      game.startGame(this.sprites[this.spriteIndex]);
     } else if (key === 'space') {
       const index = (this.spriteIndex === this.sprites.length-1) ? 0 : this.spriteIndex+1;
       this.setSpriteSrc(this.sprites[index].normal);
@@ -493,14 +488,21 @@ class GamePanel {
     }
   }
   displayResultModal(success, level, lives, gems, points) {
+    document.addEventListener('keyup', this.modalKeyHandler);
     const title = (success) ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
     this.title.textContent = title;
     this.levelResult.textContent = level;
     this.livesResult.textContent = lives;
     this.resultModal.classList.add('show-modal');
   }
-  displayIntro(){
+  displayIntroModal(){
+    document.addEventListener('keyup', this.modalKeyHandler);
     this.introModal.classList.add('show-modal');
+  }
+  closeModal() {
+    this.introModal.classList.remove('show-modal');
+    this.resultModal.classList.remove('show-modal');
+    document.removeEventListener('keyup', this.modalKeyHandler);
   }
 }
 
