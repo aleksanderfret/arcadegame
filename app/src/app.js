@@ -1,368 +1,487 @@
-class GameEntity {
-  constructor() {
-    this.x;
-    this.y;
-    this.stepY = 83;
-    this.stepX = 101;
-    this.edges = {
-      left: 0,
-      right: 101,
-      top: 0,
-      bottom: 171
-    }
-  }
-
-  addExtension(string){
-    const exetension = '.png'
-    return string+extension;
-  }
-
-  getEdge(edge) {
-    const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
-    return this[coord] + this.edges[edge];
-  }
-}
-
-class Enemy extends GameEntity {
-  constructor(track, speed, startEdge = 'left') {
-    super();
-
-    this.edges = {
-      left: 0,
-      right: 101,
-      top: 74,
-      bottom: 146
-    }
-    this.startEdge = startEdge;
-    this.speed = speed;
-    this.setStartPosition(this.startEdge, track);
-  }
-
-  update(dt) {
-    if (this.startEdge === 'left') {
-      if (this.x < 606) {
-        this.x += this.speed * dt;
-      } else {
-        this.x = -101;
-      }
-    } else {
-      if (this.x > -101) {
-        this.x -= this.speed * dt;
-      } else {
-        this.x = 707;
-      }
-    }
-  }
-
-  increaseSpeed(speed) {
-    this.speed = (this.speed >= speed) ? this.speed + 10 : speed;
-  }
-
-  // Draw the enemy on the screen, required method for game
-  render() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-  }
-
-  stop() {
-    this.speed = 0;
-  }
-
-  setStartPosition(startEdge, track) {
+const gameEnemy = ((track, speed, startEdge) => {
+  "Use strict";
+  const priv = new WeakMap();
+  const _= (instance) => priv.get(instance);
+  const setX = (instance, x) => {
+    _(instance).x = x;
+  };
+  const setY = (instance, y) => {
+    _(instance).y = y;
+  };
+  const setSpeed = (instance, speed) => {
+    _(instance).speed = speed;
+  };
+  const setStartPosition = (instance, startEdge, track) => {
     const initialPosition = 63;
-    if (this.startEdge === 'left') {
-      this.sprite = 'img/enemy-bug.png';
-      this.x = -101;
-    } else {
-      this.sprite = 'img/enemy-bug2.png';
-      this.x = 707;
+    const positionShift = 83;
+    const rightPosition = 707;
+    if (startEdge === 'right') {
+      setX(instance, rightPosition);
+      _(instance).sprite = 'img/enemy-bug2.png';
     }
     switch (track) {
       case 1:
-        this.y = initialPosition;
+        setY(instance, initialPosition);
         break;
       case 2:
-        this.y = initialPosition + this.stepY;
+        setY(instance, initialPosition + positionShift);
         break;
       case 3:
-        this.y = initialPosition + this.stepY * 2;
+        setY(instance, initialPosition + positionShift*2);
         break;
       default:
         null;
     }
-  }
-}
-
-class Player extends GameEntity {
-  constructor(sprite) {
-    super();
-    this.reset();
-    this.minX = 0;
-    this.minY = -10;
-    this.maxX = 404;
-    this.maxY = 405;
-    this.sprite = sprite;
-    let lives = 3;
-    this.edges = {
-      left: 20,
-      right: 81,
-      top: 60,
-      bottom: 143
-    }
-    this.getLives = () => {
-      return lives;
-    }
-    this.decreaseLives = () => {
-      lives = (lives > 0) ? lives - 1 : lives;
-    }
-    document.addEventListener('keyup', (event) => {
-      const allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
+  };
+  class Enemy {
+    constructor(track, speed, startEdge = 'left') {
+      const privateProps = {
+        edges: {
+          left: 0,
+          right: 101,
+          top: 74,
+          bottom: 146,
+        },
+        x: -101,
+        y: 63,
+        speed: speed,
+        startEdge: startEdge,
+        sprite: 'img/enemy-bug.png',
       };
-      this.movementHandlerInput(allowedKeys[event.keyCode]);
-    });
-
+      priv.set(this, privateProps);
+      setStartPosition(this, startEdge, track);
+    }
+    get startEdge() {
+      return _(this).startEdge;
+    }
+    get x() {
+      return _(this).x;
+    }
+    get y() {
+      return _(this).y;
+    }
+    get speed() {
+      return _(this).speed;
+    }
+    get sprite() {
+      return _(this).sprite;
+    }
+    get edges() {
+      return _(this).edges;
+    }
+    update(dt) {
+      let x = this.x;
+      const speed = this.speed;
+      const start = this.startEdge;
+      if (start === 'left') {
+        if (x < 606) {
+          x += speed * dt;
+        } else {
+          x = -101;
+        }
+      } else {
+        if (x > -101) {
+          x -= speed * dt;
+        } else {
+          x = 707;
+        }
+      }
+      setX(this, x);
+    }
+    increaseSpeed(speed) {
+      const newSpeed = (this.speed >= speed) ? this.speed + 10 : speed;
+      setSpeed(this, newSpeed);
+    }
+    render() {
+      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+    stop() {
+      setSpeed(this, 0);
+    }
+    getEdge(edge) {
+      const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
+      return this[coord] + this.edges[edge];
+    }
   }
+  return Enemy;
+})();
 
-  reset() {
-    this.isDead = false;
-    this.x = 202;
-    this.y = 405;
-  }
-
-  update() {}
-
-  die() {
-    this.isDead = true;
-  }
-
-  spriteAnimetion(result) {
-    let interval;
-    const spriteNormal = this.sprite.normal;
-    const spriteAnimated = (result === 'win') ? this.sprite.win : this.sprite.lose;
-    interval = setInterval(() => {
-      this.sprite.normal = (this.sprite.normal === spriteAnimated) ? spriteNormal : spriteAnimated;
-    }, 100);
-    setTimeout(()=> {
-      clearInterval(interval);
-      this.sprite.normal = spriteNormal;
-    }, 750);
-  }
-
-  render() {
-    ctx.drawImage(Resources.get(this.sprite.normal), this.x, this.y);
-  }
-
-  movementHandlerInput(direction) {
-    if (this.isDead) {
+const gamePlayer = ((sprite) => {
+  "Use strict";
+  const priv = new WeakMap();
+  const _= (instance) => priv.get(instance);
+  const setLives = (instance, modLives) => {
+    const lives = _(instance).lives;
+    const maxLives = _(instance).maxLives;
+    _(instance).lives = (modLives < 0 && lives > 0 || modLives > 0 && lives < maxLives) ? lives+modLives : lives;
+  };
+  const setIsDead = (instance, isDead) => {
+    _(instance).isDead = isDead;
+  };
+  const setCoords = (instance, x, y) => {
+    _(instance).coords.x = x;
+    _(instance).coords.y = y;
+  };
+  const setSpriteNormal = (instance, sprite) => {
+    _(instance).sprite.normal = sprite;
+  };
+  const movementHandlerInput = (instance, direction) => {
+    const steps = _(instance).steps;
+    const maxCoords = _(instance).maxCoords;
+    const coords = _(instance).coords;
+    if (instance.isDead || game.isLocked) {
       return;
     }
     switch (direction) {
       case 'left':
-        this.x = Math.max((this.x - this.stepX), this.minX);
+        _(instance).coords.x = Math.max((coords.x - steps.x), maxCoords.minX);
         break;
       case 'right':
-        this.x = Math.min((this.x + this.stepX), this.maxX);
+        _(instance).coords.x = Math.min((coords.x + steps.x), maxCoords.maxX);
         break;
       case 'up':
-        this.y = Math.max((this.y - this.stepY), this.minY);
+        _(instance).coords.y = Math.max((coords.y - steps.y), maxCoords.minY);
         break;
       case 'down':
-        this.y = Math.min((this.y + this.stepY), this.maxY);
+        _(instance).coords.y = Math.min((coords.y + steps.y), maxCoords.maxY);
         break;
       default:
         null;
     }
-  }
-}
+  };
+  class Player {
+    constructor(sprite) {
+      const privateProps = {
+        maxLives: 3,
+        lives: 3,
+        isDead: false,
+        maxCoords: {
+          minX: 0,
+          minY: -10,
+          maxX: 404,
+          maxY: 405,
+        },
+        edges: {
+          left: 20,
+          right: 81,
+          top: 60,
+          bottom: 143
+        },
+        steps: {
+          x: 101,
+          y: 83,
+        },
+        coords: {
+          x: 202,
+          y: 405,
+        },
+        sprite: sprite,
+      }
+      priv.set(this, privateProps);
+      this.reset();
+      document.addEventListener('keyup', (event) => {
+        const allowedKeys = {
+          37: 'left',
+          38: 'up',
+          39: 'right',
+          40: 'down'
+        };
+        movementHandlerInput(this, allowedKeys[event.keyCode]);
+      });
 
-class Game {
-  constructor() {
-    this.gamePanel = new GamePanel();
-    this.startIntro();
-    this.enemies = [];
-    this.maxLevel = 3;
-    this.isLock = false;
-    this.isStarted = false;
+    }
+
+    get lives() {
+      return _(this).lives;
+    }
+    get isDead() {
+      return _(this).isDead;
+    }
+    get maxCoords() {
+      return _(this).maxCoords;
+    }
+    get edges() {
+      return _(this).edges;
+    }
+    get steps() {
+      return _(this).steps;
+    }
+    get coords() {
+      return _(this).coords;
+    }
+    get sprite() {
+      return _(this).sprite;
+    }
+
+    reset() {
+      setIsDead(this, false);
+      setCoords(this, 202, 405);
+    }
+
+    die() {
+      setIsDead(this, true);
+    }
+
+    spriteAnimetion(result) {
+      let interval;
+      const spriteNormal = this.sprite.normal;
+      const spriteAnimated = (result === 'win') ? this.sprite.win : this.sprite.lose;
+      interval = setInterval(() => {
+        this.sprite.normal = (this.sprite.normal === spriteAnimated) ? spriteNormal : spriteAnimated;
+      }, 100);
+      setTimeout(()=> {
+        clearInterval(interval);
+        setSpriteNormal(this, spriteNormal);
+      }, 750);
+    }
+    update(){}
+    render() {
+      ctx.drawImage(Resources.get(this.sprite.normal), this.coords.x, this.coords.y);
+    }
+
+    getEdge(edge) {
+      const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
+      return this.coords[coord] + this.edges[edge];
+    }
+
+    decreaseLives() {
+        setLives(this, -1);
+    }
   }
-  getRandomInt(min, max) {
+  return Player;
+})();
+
+const arcadeGame = (()=>{
+  "Use strict";
+  const priv = new WeakMap();
+  const _= (instance) => priv.get(instance);
+  const setIsLocked = (instance, locked) => {
+    _(instance).isLocked = locked;
+  };
+  const setParam = (instance, property, value) => {
+    _(instance)[property] = value;
+  };
+  const setIsStarted = (instance, started) => {
+    _(instance).isStarted = started;
+  };
+  const setPlayer = (instance, player) => {
+    _(instance).player = player;
+  };
+  const setLevel = (instance, level) => {
+    _(instance).level = level;
+  };
+  const setEnemies = (instance, enemies) => {
+    _(instance).enemies = enemies;
+  };
+  const getRandomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  createEnemies() {
+  };
+  const renderEntities = (instance) => {
+    _(instance).enemies.forEach(function (enemy) {
+      enemy.render();
+    });
+    _(instance).player.render();
+  };
+  const updateEntities = (instance, dt) => {
+    _(instance).enemies.forEach((enemy) => {
+      enemy.update(dt);
+    });
+    _(instance).player.update();
+  };
+  const createEnemies = (instance) => {
+    const enemies = _(instance).enemies;
+    const level = _(instance).level;
     const createdEnemies = [];
-    const enemiesNumberRange = this.level.getEnemiesNumberRange();
-    const enemiesSpeedRange = this.level.getEnemiesSpeedRange();
-    const enemiesNum = this.getRandomInt(enemiesNumberRange[0], enemiesNumberRange[1]);
-    const newEnemiesNum = enemiesNum - this.enemies.length;
+    const enemiesNumberRange = level.enemiesNumberRange;
+    const enemiesSpeedRange = level.enemiesSpeedRange;
+    const enemiesNum = getRandomInt(enemiesNumberRange[0], enemiesNumberRange[1]);
+    const newEnemiesNum = enemiesNum - enemies.length;
     let isOppositeEnemy = 0;
     let enemyTrack;
     let enemySpeed;
     for (let i = 1; i <= newEnemiesNum; i++) {
-      if (this.enemies.length >= 4) {
-        isOppositeEnemy = this.getRandomInt(0, 1);
+      if (enemies.length >= 4) {
+        isOppositeEnemy = getRandomInt(0, 1);
       }
-      enemySpeed = this.getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
+      enemySpeed = getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
 
-      if (this.enemies.length === 0 && i <= 3) {
+      if (enemies.length === 0 && i <= 3) {
         enemyTrack = i;
       } else {
-        enemyTrack = this.getRandomInt(1, 3);
+        enemyTrack = getRandomInt(1, 3);
       }
 
       const startEdge = isOppositeEnemy ? 'right' : 'left';
-      createdEnemies.push(new Enemy(enemyTrack, enemySpeed, startEdge));
+      createdEnemies.push(new gameEnemy(enemyTrack, enemySpeed, startEdge));
     }
-    this.enemies.push(...createdEnemies);
-
-  }
-  render() {
-    if(this.isStarted){
-      this.renderEntities();
-      this.gamePanel.render(this.level.getLevel(), this.player.getLives());
-    }
-  }
-  renderEntities() {
-    this.enemies.forEach(function (enemy) {
-      enemy.render();
-    });
-    this.player.render();
-  }
-  checkIsDaed() {
-    let isDead = false;
-    this.player.die();
-    this.player.decreaseLives();
-
-    if (this.player.getLives() === 0 ) {
-      isDead = true;
-    } else {
-      this.player.spriteAnimetion('lose');
-    }
-    return isDead;
-  }
-  update(dt) {
-    if(!this.isStarted){
-      return;
-    }
-    this.updateEntities(dt);
-    if (this.isLock) {
-      return
-    }
-    if (this.checkCollision()) {
-      this.isLock = true;
-      if (this.checkIsDaed()) {
-        this.loseGame();
-      } else {
-        this.resetRound();
-      }
-    } else if (this.checkGoal()) {
-      this.isLock = true;
-      if (this.level.getLevel() === this.maxLevel) {
-        this.winGame();
-      } else {
-        this.increaseLevel();
-      }
-    }
-  }
-  updateEntities(dt) {
-    this.enemies.forEach((enemy) => {
-      enemy.update(dt);
-    });
-    this.player.update();
-  }
-  increaseLevel() {
-    this.level.update();
-    this.enemies.forEach((enemy) => {
-      const speedRange = this.level.getEnemiesNumberRange();
-      enemy.increaseSpeed(this.getRandomInt(speedRange[0], speedRange[1]));
-    });
-    this.player.spriteAnimetion('win');
-    this.resetRound();
-  }
-  loseGame() {
-    this.enemies.forEach((enemy) => {
-      enemy.stop();
-    });
-    this.player.spriteAnimetion('lose');
-    setTimeout(()=>{
-      this.gamePanel.displayResultModal(false, this.level.getLevel(), this.player.getLives(), 0, 0);
-      this.stopGame();
-    }, 1000);
-
-  }
-  winGame() {
-    this.enemies.forEach((enemy) => {
-      enemy.stop();
-    });
-    this.player.spriteAnimetion('win');
-    setTimeout(()=>{
-      this.gamePanel.displayResultModal(true, this.level.getLevel(), this.player.getLives(), 0, 0);
-      this.stopGame();
-    }, 1000);
-  }
-  startGame(sprite) {
-    this.level = new Level();
-    this.createEnemies();
-    this.player = new Player(sprite);
-    this.isStarted = true;
-    this.isLock = false;
-  }
-  stopGame() {
-    this.isStarted = false;
-    this.enemies = [];
-    this.player = null;
-    this.level = null;
-  }
-  startIntro(){
-    this.gamePanel.displayIntroModal();
-  }
-
-  checkCollision() {
-    for (const enemy of this.enemies) {
-      if (this.player.getEdge('left') <= enemy.getEdge('right') &&
-        this.player.getEdge('right') >= enemy.getEdge('left') &&
-        this.player.getEdge('top') <= enemy.getEdge('bottom') &&
-        this.player.getEdge('bottom') >= enemy.getEdge('top')) {
+    setEnemies(instance, [...enemies, ...createdEnemies]);
+  };
+  const checkCollision = (instance) => {
+    const player = _(instance).player;
+    const enemies = _(instance).enemies;
+    for (const enemy of enemies) {
+      if (player.getEdge('left') <= enemy.getEdge('right') &&
+        player.getEdge('right') >= enemy.getEdge('left') &&
+        player.getEdge('top') <= enemy.getEdge('bottom') &&
+        player.getEdge('bottom') >= enemy.getEdge('top')) {
         return true;
       }
     }
     return false;
-  }
+  };
+  const checkIsDaed = (instance) => {
+    let isDead = false;
+    const player = _(instance).player;
+    player.die();
+    player.decreaseLives();
 
-  checkGoal() {
-    if (this.player.y == this.player.minY) {
+    if (player.lives === 0 ) {
+      isDead = true;
+    } else {
+      player.spriteAnimetion('lose');
+    }
+    return isDead;
+  };
+  const checkGoal = (instance) => {
+    const player = _(instance).player;
+    if (player.coords.y === player.maxCoords.minY) {
       return true;
     }
-  }
-  resetRound() {
+  };
+  const increaseLevel = (instance) => {
+    const level = _(instance).level;
+    const player = _(instance).player;
+    const enemies = _(instance).enemies;
+    level.update();
+    enemies.forEach((enemy) => {
+      const speedRange = level.enemiesNumberRange;
+      enemy.increaseSpeed(getRandomInt(speedRange[0], speedRange[1]));
+    });
+    player.spriteAnimetion('win');
+    resetRound(instance);
+  };
+  const resetRound= (instance) => {
     setTimeout(() => {
-      this.createEnemies();
-      this.player.reset();
-      this.isLock = false;
+      createEnemies(instance);
+      _(instance).player.reset();
+      setIsLocked(instance, false);
     }, 1000);
-  }
-}
+  };
+  const startIntro = (instance) => {
+    _(instance).panel.displayIntroModal();
+  };
+  const stopGame = (instance) => {
+    setIsStarted(instance, false);
+    setEnemies(instance, []);
+    setPlayer(instance, null);
+    setLevel(instance, null);
+  };
+  const endGame = (instance, result) => {
+    const enemies = _(instance).enemies;
+    const player = _(instance).player;
+    const level = _(instance).level;
+    const panel = _(instance).panel;
+    const success = (result === 'win') ? true : false;
+    enemies.forEach((enemy) => {
+      enemy.stop();
+    });
+    player.spriteAnimetion(result);
+    setTimeout(()=>{
+      panel.displayResultModal(success, level.level, player.lives, 0, 0);
+      stopGame(instance);
+    }, 1000);
+  };
 
-class Level {
-  constructor() {
-    let level = 1;
-    let enemiesNumberRange = this.calculateEnemiesNumber(level);
-    let enemiesSpeedRange = this.calculateEnemiesSpeed(level);
-    this.getLevel = () => level;
-    this.setLevel = () => {
-      level++;
-      enemiesNumberRange = this.calculateEnemiesNumber(level);
-      enemiesSpeedRange = this.calculateEnemiesSpeed(level);
-    };
-    this.getEnemiesNumberRange = () => enemiesNumberRange;
-    this.getEnemiesSpeedRange = () => enemiesSpeedRange;
+  class Game {
+    constructor() {
+      const privateProps = {
+        panel: new gamePanel(),
+        isStarted: false,
+        isLocked: false,
+        level: null,
+        player: null,
+        maxLevel: 3,
+        enemies: [],
+      }
+      priv.set(this, privateProps);
+      startIntro(this);
+    }
+    get isStarted(){
+      return _(this).isStarted;
+    }
+    get isLocked(){
+      return _(this).isLocked;
+    }
+    get panel (){
+      return _(this).panel;
+    }
+    get level(){
+      return _(this).level;
+    }
+    get player(){
+      return _(this).player;
+    }
+    get enemies(){
+      return [..._(this).enemies];
+    }
+    get maxLevel(){
+      return _(this).maxLevel;
+    }
+    render() {
+      if(this.isStarted){
+        renderEntities(this);
+        this.panel.render(this.level.level, this.player.lives);
+      }
+    }
+    update(dt) {
+      if(!this.isStarted){
+        return;
+      }
+      updateEntities(this, dt);
+      if (this.isLocked) {
+        return
+      }
+      if (checkCollision(this)) {
+        setIsLocked(this, true);
+        if (checkIsDaed(this)) {
+          endGame(this, 'lose');
+        } else {
+          resetRound(this);
+        }
+      } else if (checkGoal(this)) {
+        setIsLocked(this, true);
+        if (this.level.level === this.maxLevel) {
+          endGame(this, 'win');
+        } else {
+          increaseLevel(this);
+        }
+      }
+    }
+    startGame(sprite) {
+      setLevel(this, new gameLevel());
+      createEnemies(this);
+      setPlayer(this, new gamePlayer(sprite));
+      setIsStarted(this, true);
+      setIsLocked(this, false)
+    }
   }
-  update() {
-    this.setLevel();
-  }
-  calculateEnemiesNumber(level) {
+  return Game;
+})();
+
+const gameLevel = (() => {
+  "Use strict";
+  const priv = new WeakMap();
+  const _= (instance) => priv.get(instance);
+  const setLevel = (instance) => {
+    _(instance).level++;
+  };
+  const setEnemiesNumberRange = (instance, numberRange) => {
+    _(instance).enemiesNumberRange = numberRange;
+  };
+  const setEnemiesSpeedRange = (instance, speedRange) => {
+    _(instance).enemiesSpeedRange = speedRange;
+  };
+  const calculateEnemiesNumber = (level) => {
     const enemiesNumberRange = [];
     let min;
     let max;
@@ -387,8 +506,8 @@ class Level {
     }
     enemiesNumberRange.push(min, max);
     return enemiesNumberRange;
-  }
-  calculateEnemiesSpeed(level) {
+  };
+  const calculateEnemiesSpeed = (level) => {
     const enemiesSpeedRange = [];
     let min;
     let max;
@@ -413,97 +532,164 @@ class Level {
     }
     enemiesSpeedRange.push(min, max);
     return enemiesSpeedRange;
-  }
-}
+  };
 
-class GamePanel {
-  constructor() {
-    this.resultModal = document.querySelector('#result-modal');
-    this.introModal = document.querySelector('#intro-modal');
-    this.title = document.querySelector('.title');
-    this.levelResult = document.querySelector('.level-result');
-    this.livesResult = document.querySelector('.lives-result');
-    this.spriteImages = document.querySelectorAll('.sprite img');
-    this.spriteIndex = 0;
-    this.sprites = [
-      {
-        normal: 'img/char-boy.png',
-        lose: 'img/char-boy-lose.png',
-        win: 'img/char-boy-win.png',
-      },
-      {
-        normal: 'img/char-cat-girl.png',
-        lose: 'img/char-cat-girl-lose.png',
-        win: 'img/char-cat-girl-win.png',
-      },
-      {
-        normal: 'img/char-horn-girl.png',
-        lose: 'img/char-horn-girl-lose.png',
-        win: 'img/char-horn-girl-win.png',
-      },
-      {
-        normal: 'img/char-pink-girl.png',
-        lose: 'img/char-pink-girl-lose.png',
-        win: 'img/char-pink-girl-win.png',
-      },
-      {
-        normal: 'img/char-princess-girl.png',
-        lose: 'img/char-princess-girl-lose.png',
-        win: 'img/char-princess-girl-win.png',
-      }];
-    this.setSpriteSrc(this.sprites[this.spriteIndex].normal);
-    this.modalKeyHandler = (event) => {
-      const allowedKeys = {
-        32: 'space',
-        13: 'enter'
-      };
-      this.startOptionsHandler(allowedKeys[event.keyCode]);
+  class Level {
+    constructor() {
+      const initLevel = 1;
+      const privateProps = {
+        level: initLevel,
+        enemiesNumberRange: calculateEnemiesNumber(initLevel),
+        enemiesSpeedRange: calculateEnemiesSpeed(initLevel),
+      }
+      priv.set(this, privateProps);
     }
 
+    get level(){
+      return _(this).level;
+    }
+    get enemiesNumberRange(){
+      return _(this).enemiesNumberRange;
+    }
+    get enemiesSpeedRange(){
+      return _(this).enemiesSpeedRange;
+    }
+
+    update() {
+      setLevel(this);
+      setEnemiesNumberRange(this, calculateEnemiesNumber(this.level));
+      setEnemiesSpeedRange(this, calculateEnemiesSpeed(this.level));
+    }
   }
-  setSpriteSrc(url){
-    this.spriteImages.forEach((spriteImage)=>{
+  return Level;
+})();
+
+const gamePanel= (() => {
+  const priv = new WeakMap();
+  const _= (instance) => priv.get(instance);
+  const setSpriteSrc = (instance, url) => {
+    _(instance).spriteImages.forEach((spriteImage)=>{
       spriteImage.setAttribute('src', url);
     });
-  }
-  startOptionsHandler(key) {
+  };
+  const setSpriteIndex = (instance, index) => {
+    _(instance).spriteIndex = index;
+  };
+  const closeModal = (instance) => {
+    _(instance).introModal.classList.remove('show-modal');
+    _(instance).resultModal.classList.remove('show-modal');
+    document.removeEventListener('keyup', _(instance).modalKeyHandler);
+  };
+
+  const startOptionsHandler = (instance, key) => {
+    const sprites = _(instance).sprites;
+    const spriteIndex = _(instance).spriteIndex;
     if(key === 'enter') {
-      this.closeModal();
-      game.startGame(this.sprites[this.spriteIndex]);
+      closeModal(instance);
+      game.startGame(sprites[spriteIndex]);
     } else if (key === 'space') {
-      const index = (this.spriteIndex === this.sprites.length-1) ? 0 : this.spriteIndex+1;
-      this.setSpriteSrc(this.sprites[index].normal);
-      this.spriteIndex = index;
+      const index = (spriteIndex === sprites.length-1) ? 0 : spriteIndex+1;
+      setSpriteSrc(instance, sprites[index].normal);
+      setSpriteIndex(instance, index);
+    }
+  };
+
+  class Panel {
+    constructor() {
+      const privateProps = {
+        resultModal: document.querySelector('#result-modal'),
+        introModal: document.querySelector('#intro-modal'),
+        title: document.querySelector('.title'),
+        levelResult: document.querySelector('.level-result'),
+        livesResult: document.querySelector('.lives-result'),
+        spriteImages: document.querySelectorAll('.sprite img'),
+        spriteIndex: 0,
+        sprites: [
+          {
+            normal: 'img/char-boy.png',
+            lose: 'img/char-boy-lose.png',
+            win: 'img/char-boy-win.png',
+          },
+          {
+            normal: 'img/char-cat-girl.png',
+            lose: 'img/char-cat-girl-lose.png',
+            win: 'img/char-cat-girl-win.png',
+          },
+          {
+            normal: 'img/char-horn-girl.png',
+            lose: 'img/char-horn-girl-lose.png',
+            win: 'img/char-horn-girl-win.png',
+          },
+          {
+            normal: 'img/char-pink-girl.png',
+            lose: 'img/char-pink-girl-lose.png',
+            win: 'img/char-pink-girl-win.png',
+          },
+          {
+            normal: 'img/char-princess-girl.png',
+            lose: 'img/char-princess-girl-lose.png',
+            win: 'img/char-princess-girl-win.png',
+          }],
+      };
+      priv.set(this, privateProps);
+      this.modalKeyHandler = (event) => {
+        const allowedKeys = {
+          32: 'space',
+          13: 'enter'
+        };
+        startOptionsHandler(this, allowedKeys[event.keyCode]);
+      };
+    }
+    get sprites() {
+      return _(this).sprites;
+    }
+    get spriteIndex() {
+      return _(this).spriteIndex;
+    }
+    get spriteImages() {
+      return _(this).spriteImages;
+    }
+    get resultModal() {
+      return _(this).resultModal;
+    }
+    get introModal() {
+      return _(this).introModal;
+    }
+    get title() {
+      return _(this).title;
+    }
+    get levelResult() {
+      return _(this).levelResult;
+    }
+    get livesResult() {
+      return _(this).livesResult;
+    }
+
+    render(level, lives) {
+      ctx.font = "20px Ubuntu";
+      ctx.fillStyle = "white";
+      ctx.fillText(`Level: ${level}/12`, 10, 33);
+      ctx.fillText(`Lives:`, 150, 33);
+      const step = 35;
+      for(let i=0; i<lives; i++) {
+        ctx.drawImage(Resources.get('img/Heart.png'), 205+step*i, 0, 30,50);
+      }
+    }
+
+    displayResultModal(success, level, lives, gems, points) {
+      document.addEventListener('keyup', this.modalKeyHandler);
+      const title = (success) ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
+      this.title.textContent = title;
+      this.levelResult.textContent = level;
+      this.livesResult.textContent = lives;
+      this.resultModal.classList.add('show-modal');
+    }
+    displayIntroModal(){
+      document.addEventListener('keyup', this.modalKeyHandler);
+      this.introModal.classList.add('show-modal');
     }
   }
+  return Panel;
+})();
 
-  render(level, lives) {
-    ctx.font = "20px Ubuntu";
-    ctx.fillStyle = "white";
-    ctx.fillText(`Level: ${level}/12`, 10, 33);
-    ctx.fillText(`Lives:`, 150, 33);
-    const step = 35;
-    for(let i=0; i<lives; i++) {
-      ctx.drawImage(Resources.get('img/Heart.png'), 205+step*i, 0, 30,50);
-    }
-  }
-  displayResultModal(success, level, lives, gems, points) {
-    document.addEventListener('keyup', this.modalKeyHandler);
-    const title = (success) ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
-    this.title.textContent = title;
-    this.levelResult.textContent = level;
-    this.livesResult.textContent = lives;
-    this.resultModal.classList.add('show-modal');
-  }
-  displayIntroModal(){
-    document.addEventListener('keyup', this.modalKeyHandler);
-    this.introModal.classList.add('show-modal');
-  }
-  closeModal() {
-    this.introModal.classList.remove('show-modal');
-    this.resultModal.classList.remove('show-modal');
-    document.removeEventListener('keyup', this.modalKeyHandler);
-  }
-}
-
-const game = new Game();
+const game = new arcadeGame();
