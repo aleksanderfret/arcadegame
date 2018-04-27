@@ -2,8 +2,10 @@
 This game was created as a project within the Google Scholarship Programm.
 ## Version
 1.0.0 - 2018.04.27
+## Play the game
+[www.aracadegame.fret.com.pl](http://www.arcadegame.fret.com.pl)
 ## Game instructions
-- Press space to change the player.
+- Press space to change the player image.
 - Press enter to start the game.
 - Use arrow keys to move the player.
 - To win the game the player has to pass the 12th level.
@@ -11,6 +13,13 @@ This game was created as a project within the Google Scholarship Programm.
 - The player has 3 lives. He looses one after collision with an enemy.
 ## Technologies
 JavaScript, CSS, HTML.
+## Using this repository
+- To run this project locally:
+  - Get the repo.
+  - Go to the project directory in the terminal.
+  - Run command: `npm install`.
+  - Run command: `gulp`.
+- To build the project, run command: `gulp build`.
 ## ToDo
 - Game points
 - Collecting gems to earn extra points
