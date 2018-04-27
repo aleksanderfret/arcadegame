@@ -557,7 +557,7 @@ const arcadeGame = (() => {
   };
 
   /**
-   * @description creates game enemies
+   * @description checks if there is a collision between the player and the enemies
    * @param {object} instance
    */
   const checkCollision = (instance) => {
@@ -573,6 +573,11 @@ const arcadeGame = (() => {
     }
     return false;
   };
+
+  /**
+   * @description checks if player is dead or lost life only
+   * @param {object} instance
+   */
   const checkIsDaed = (instance) => {
     let isDead = false;
     const player = _(instance).player;
@@ -586,40 +591,77 @@ const arcadeGame = (() => {
     }
     return isDead;
   };
+
+  /**
+   * @description checks if the player has reached the goal
+   * @param {object} instance
+   */
   const checkGoal = (instance) => {
     const player = _(instance).player;
     if (player.coords.y === player.maxCoords.minY) {
       return true;
     }
   };
+
+  /**
+   * @description increases the level
+   * @param {object} instance
+   */
   const increaseLevel = (instance) => {
     const level = _(instance).level;
     const player = _(instance).player;
     const enemies = _(instance).enemies;
     level.update();
+
+    //increases speed of existing enemies
     enemies.forEach((enemy) => {
       const speedRange = level.enemiesNumberRange;
       enemy.increaseSpeed(getRandomInt(speedRange[0], speedRange[1]));
     });
+
+    // animate the player
     player.spriteAnimetion('win');
     resetRound(instance);
   };
+
+  /**
+   * @description resets game round (stage)
+   * @param {object} instance
+   */
   const resetRound = (instance) => {
     setTimeout(() => {
+      // creates new enemies (it determines whether it is needed)
       createEnemies(instance);
+      // resets the player position
       _(instance).player.reset();
+      //Unlock the game
       setIsLocked(instance, false);
     }, 1000);
   };
+
+  /**
+   * @description displays game intro to show game tutorial and enable game start
+   * @param {object} instance
+   */
   const startIntro = (instance) => {
     _(instance).panel.displayIntroModal();
   };
+
+  /**
+   * @description stops the game by reseting level and removig player and enemies
+   * @param {object} instance
+   */
   const stopGame = (instance) => {
     setIsStarted(instance, false);
     setEnemies(instance, []);
     setPlayer(instance, null);
     setLevel(instance, null);
   };
+
+  /**
+   * @description ends game when player win or lose the game
+   * @param {object} instance
+   */
   const endGame = (instance, result) => {
     const enemies = _(instance).enemies;
     const player = _(instance).player;
@@ -638,18 +680,23 @@ const arcadeGame = (() => {
 
   class Game {
     constructor() {
+      // private properties for Game class
       const privateProps = {
         panel: new gamePanel(),
         isStarted: false,
         isLocked: false,
         level: null,
         player: null,
-        maxLevel: 3,
+        maxLevel: 12,
         enemies: [],
       }
+      // stores private properties for class instance
       priv.set(this, privateProps);
+      // turns on modal with game tutorial
       startIntro(this);
     }
+
+    // getters for private properties
     get isStarted() {
       return _(this).isStarted;
     }
@@ -671,12 +718,22 @@ const arcadeGame = (() => {
     get maxLevel() {
       return _(this).maxLevel;
     }
+
+    // public methods
+    /**
+     * @description rednders game entities and game info (level, lives)
+     */
     render() {
       if (this.isStarted) {
         renderEntities(this);
         this.panel.render(this.level.level, this.player.lives);
       }
     }
+
+    /**
+     * @description updates game entities
+     *   and checks the game's incidents: collision or pass the level
+     */
     update(dt) {
       if (!this.isStarted) {
         return;
@@ -701,6 +758,11 @@ const arcadeGame = (() => {
         }
       }
     }
+
+    /**
+     * @description starts the game with new props
+     * @param {object} instance
+     */
     startGame(sprite) {
       setLevel(this, new gameLevel());
       createEnemies(this);
@@ -712,20 +774,55 @@ const arcadeGame = (() => {
   return Game;
 })();
 
+/**
+ * @description gameLevel holds Level class returned by IIFE (for encapsulation)
+ * @return {function}
+ */
 const gameLevel = (() => {
   "Use strict";
+  // holds private properties of instances of Player class
   const priv = new WeakMap();
-  const _ = (instance) => priv.get(instance);
+
+  // private "methods" for Player class
+  /**
+   * @description returns private properties of the instance
+   * @param {object} instance
+   * @return {object}
+   */
+  const _= (instance) => priv.get(instance);
+
+  /**
+   * @description sets level property
+   * @param {object} instance
+   */
   const setLevel = (instance) => {
     _(instance).level++;
   };
+
+  /**
+   * @description sets enemiesNumberRange property
+   * @param {object} instance
+   * @param {array} numberRange
+   */
   const setEnemiesNumberRange = (instance, numberRange) => {
     _(instance).enemiesNumberRange = numberRange;
   };
+
+  /**
+   * @description sets enemiesSpeedRange property
+   * @param {object} instance
+   * @param {array} speedRange
+   */
   const setEnemiesSpeedRange = (instance, speedRange) => {
     _(instance).enemiesSpeedRange = speedRange;
   };
-  const calculateEnemiesNumber = (level) => {
+
+  /**
+   * @description determines the numerical range of number of enemies
+   * @param {object} instance
+   * @param {number} level
+   */
+  const calculateEnemiesNumberRange = (level) => {
     const enemiesNumberRange = [];
     let min;
     let max;
@@ -751,7 +848,13 @@ const gameLevel = (() => {
     enemiesNumberRange.push(min, max);
     return enemiesNumberRange;
   };
-  const calculateEnemiesSpeed = (level) => {
+
+  /**
+   * @description determines the numerical range of enemy speed
+   * @param {object} instance
+   * @param {number} level
+   */
+  const calculateEnemiesSpeedRange = (level) => {
     const enemiesSpeedRange = [];
     let min;
     let max;
@@ -781,14 +884,18 @@ const gameLevel = (() => {
   class Level {
     constructor() {
       const initLevel = 1;
+      // private properties for Player class
       const privateProps = {
         level: initLevel,
-        enemiesNumberRange: calculateEnemiesNumber(initLevel),
-        enemiesSpeedRange: calculateEnemiesSpeed(initLevel),
+        enemiesNumberRange: calculateEnemiesNumberRange(initLevel),
+        enemiesSpeedRange: calculateEnemiesSpeedRange(initLevel),
       }
+
+      // stores private properties for class instance
       priv.set(this, privateProps);
     }
 
+    // getters for private properties
     get level() {
       return _(this).level;
     }
@@ -799,10 +906,14 @@ const gameLevel = (() => {
       return _(this).enemiesSpeedRange;
     }
 
+    // public methods
+    /**
+     * @description updates the level object
+     */
     update() {
       setLevel(this);
-      setEnemiesNumberRange(this, calculateEnemiesNumber(this.level));
-      setEnemiesSpeedRange(this, calculateEnemiesSpeed(this.level));
+      setEnemiesNumberRange(this, calculateEnemiesNumberRange(this.level));
+      setEnemiesSpeedRange(this, calculateEnemiesSpeedRange(this.level));
     }
   }
   return Level;
