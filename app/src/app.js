@@ -6,7 +6,6 @@
  * @return {function}
  */
 const gameEnemy = ((track, speed, startEdge) => {
-  "Use strict";
   // holds private properties of instances of Enemy class
   const priv = new WeakMap();
 
@@ -197,7 +196,6 @@ const gameEnemy = ((track, speed, startEdge) => {
  * @return {function}
  */
 const gamePlayer = ((sprite) => {
-  "Use strict";
   // holds private properties of instances of Player class
   const priv = new WeakMap();
 
@@ -427,7 +425,6 @@ const gamePlayer = ((sprite) => {
  * @return {function}
  */
 const arcadeGame = (() => {
-  "Use strict";
   // holds private properties of instances of Game class
   const priv = new WeakMap();
 
@@ -786,7 +783,6 @@ const arcadeGame = (() => {
  * @return {function}
  */
 const gameLevel = (() => {
-  "Use strict";
   // holds private properties of instances of Level class
   const priv = new WeakMap();
 
@@ -931,7 +927,6 @@ const gameLevel = (() => {
  * @return {function}
  */
 const gamePanel = (() => {
-  "Use strict";
   // holds private properties of instances of Panel class
   const priv = new WeakMap();
 
