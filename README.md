@@ -1,6 +1,22 @@
-frontend-nanodegree-arcade-game
-===============================
-
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission. Make sure the functions you write are **object-oriented** - either class functions (like Player and Enemy) or class prototype functions such as Enemy.prototype.checkCollisions, and that the keyword 'this' is used appropriately within your class and class prototype functions to refer to the object the function is called upon. Also be sure that the **readme.md** file is updated with your instructions on both how to 1. Run and 2. Play your arcade game.
-
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+# Arcade Game
+This game was created as a project within the Google Scholarship Programm.
+## Version
+1.0.0 - 2018.04.27
+## Game instructions
+- Press space to change the player.
+- Press enter to start the game.
+- Use arrow keys to move the player.
+- To win the game the player has to pass the 12th level.
+- The player needs to reach the water to pass the level.
+- The player has 3 lives. He looses one after collision with an enemy.
+## Technologies
+JavaScript, CSS, HTML.
+## ToDo
+- Game points
+- Collecting gems to earn extra points
+- Increasing the number of lives by collecting hearts
+- Collecting the golde key to pass the level
+## Contribution
+This project (frontend-nanodegree-arcade-game) was #madewithudacity and #googleudacityscholars. Thank you.
+## License
+The MIT License (MIT)
