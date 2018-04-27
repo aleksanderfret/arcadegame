@@ -1,5 +1,4 @@
 @import "partials/variables";
-
 /* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
@@ -138,10 +137,10 @@ table {
 }
 
 body {
-    text-align: center;
-    color: $text-color;
-    background-color: $background-color;
-    font: normal normal 300 $text-size $text-font;
+  text-align: center;
+  color: $text-color;
+  background-color: $background-color;
+  font: normal normal 300 $text-size $text-font;
 }
 
 .key {
@@ -184,6 +183,7 @@ body {
   font-size: 1.4em;
   font-weight: $text-weight;
 }
+
 .instruction-title {
   line-height: 1.4rem;
   font-size: 1.2rem;
@@ -202,6 +202,7 @@ body {
   justify-content: left;
   text-align: left;
 }
+
 .game-result .fas,
 .instruction .fas {
   display: inline-block;
@@ -243,7 +244,6 @@ body {
   display: block;
   top: -50px;
 }
-
 
 .show-modal {
   display: flex;

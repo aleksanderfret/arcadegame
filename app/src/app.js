@@ -207,7 +207,7 @@ const gamePlayer = ((sprite) => {
    * @param {object} instance
    * @return {object}
    */
-  const _= (instance) => priv.get(instance);
+  const _ = (instance) => priv.get(instance);
 
   /**
    * @description sets lives property (add lives for future increase lives)
@@ -428,10 +428,10 @@ const gamePlayer = ((sprite) => {
  */
 const arcadeGame = (() => {
   "Use strict";
-  // holds private properties of instances of Player class
+  // holds private properties of instances of Game class
   const priv = new WeakMap();
 
-  // private "methods" for Player class
+  // private "methods" for Game class
   /**
    * @description returns private properties of the instance
    * @param {object} instance
@@ -447,7 +447,7 @@ const arcadeGame = (() => {
   /**
    * @description sets isLocked property
    * @param {object} instance
-   * @param {boolean} isLocked
+   * @param {boolean} locked
    */
   const setIsLocked = (instance, locked) => {
     _(instance).isLocked = locked;
@@ -456,7 +456,7 @@ const arcadeGame = (() => {
   /**
    * @description sets isStarted property
    * @param {object} instance
-   * @param {boolean} isStarted
+   * @param {boolean} started
    */
   const setIsStarted = (instance, started) => {
     _(instance).isStarted = started;
@@ -499,7 +499,7 @@ const arcadeGame = (() => {
   };
 
   /**
-   * @description renders game entities
+   * @description renders game entities (player and enemies)
    * @param {object} instance
    */
   const renderEntities = (instance) => {
@@ -521,24 +521,25 @@ const arcadeGame = (() => {
   };
 
   /**
-   * @description creates game enemies
+   * @description creates enemies
    * @param {object} instance
    */
   const createEnemies = (instance) => {
     const enemies = _(instance).enemies;
     const level = _(instance).level;
     const createdEnemies = [];
-    const enemiesNumberRange = level.enemiesNumberRange; // for gets a number of enemies
-    const enemiesSpeedRange = level.enemiesSpeedRange; // for gets a speed of enemy
+    const enemiesNumberRange = level.enemiesNumberRange; // used for drawing number of enemies
+    const enemiesSpeedRange = level.enemiesSpeedRange; // used for drawing speed of enemy
     const enemiesNumber = getRandomInt(enemiesNumberRange[0], enemiesNumberRange[1]);
-    // calculates number of new enemies which must be added
-    const newEnemiesNum = enemiesNumber - enemies.length;
-    let isOppositeEnemy = 0; // to set direction of movement
-    let enemyTrack; // to set track of movement
+    const newEnemiesNum = enemiesNumber - enemies.length; // number of new enemies which must be added
+    let hasOppositeDirection = false; // used for setting direction of movement
+    let enemyTrack; // used for setting track of movement
     let enemySpeed;
+
+    // creates new enemies, first determining values of constructor params
     for (let i = 1; i <= newEnemiesNum; i++) {
       if (enemies.length >= 4) {
-        isOppositeEnemy = getRandomInt(0, 1);
+        hasOppositeDirection = Boolean(getRandomInt(0, 1));
       }
       enemySpeed = getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
 
@@ -548,11 +549,12 @@ const arcadeGame = (() => {
         enemyTrack = getRandomInt(1, 3);
       }
 
-      const startEdge = isOppositeEnemy ? 'right' : 'left';
-      //creates new enemy and adds it to the array
+      const startEdge = hasOppositeDirection ? 'right' : 'left';
+
       createdEnemies.push(new gameEnemy(enemyTrack, enemySpeed, startEdge));
     }
-    //stores created enemies to the private enemies array
+
+    // stores all enemies (old and new ones) in the private enemies property
     setEnemies(instance, [...enemies, ...createdEnemies]);
   };
 
@@ -575,7 +577,7 @@ const arcadeGame = (() => {
   };
 
   /**
-   * @description checks if player is dead or lost life only
+   * @description checks if player is dead or lost life only ;-)
    * @param {object} instance
    */
   const checkIsDaed = (instance) => {
@@ -619,21 +621,26 @@ const arcadeGame = (() => {
       enemy.increaseSpeed(getRandomInt(speedRange[0], speedRange[1]));
     });
 
-    // animate the player
+    // animates the player
     player.spriteAnimetion('win');
-    resetRound(instance);
+    resetRound(instance, true);
   };
 
   /**
    * @description resets game round (stage)
    * @param {object} instance
+   * @param {boolean} isLevelIncreased
    */
-  const resetRound = (instance) => {
+  const resetRound = (instance, isLevelIncreased) => {
     setTimeout(() => {
-      // creates new enemies (it determines whether it is needed)
-      createEnemies(instance);
+      if (isLevelIncreased) {
+        // creates new enemies
+        createEnemies(instance);
+      }
+
       // resets the player position
       _(instance).player.reset();
+
       //Unlock the game
       setIsLocked(instance, false);
     }, 1000);
@@ -648,7 +655,7 @@ const arcadeGame = (() => {
   };
 
   /**
-   * @description stops the game by reseting level and removig player and enemies
+   * @description stops the game and resets its props
    * @param {object} instance
    */
   const stopGame = (instance) => {
@@ -659,7 +666,7 @@ const arcadeGame = (() => {
   };
 
   /**
-   * @description ends game when player win or lose the game
+   * @description ends game when player win or lose
    * @param {object} instance
    */
   const endGame = (instance, result) => {
@@ -692,7 +699,7 @@ const arcadeGame = (() => {
       }
       // stores private properties for class instance
       priv.set(this, privateProps);
-      // turns on modal with game tutorial
+      // turns on the modal with game tutorial
       startIntro(this);
     }
 
@@ -747,7 +754,7 @@ const arcadeGame = (() => {
         if (checkIsDaed(this)) {
           endGame(this, 'lose');
         } else {
-          resetRound(this);
+          resetRound(this, false);
         }
       } else if (checkGoal(this)) {
         setIsLocked(this, true);
@@ -760,7 +767,7 @@ const arcadeGame = (() => {
     }
 
     /**
-     * @description starts the game with new props
+     * @description starts the game
      * @param {object} instance
      */
     startGame(sprite) {
@@ -780,16 +787,16 @@ const arcadeGame = (() => {
  */
 const gameLevel = (() => {
   "Use strict";
-  // holds private properties of instances of Player class
+  // holds private properties of instances of Level class
   const priv = new WeakMap();
 
-  // private "methods" for Player class
+  // private "methods" for Level class
   /**
    * @description returns private properties of the instance
    * @param {object} instance
    * @return {object}
    */
-  const _= (instance) => priv.get(instance);
+  const _ = (instance) => priv.get(instance);
 
   /**
    * @description sets level property
@@ -884,7 +891,7 @@ const gameLevel = (() => {
   class Level {
     constructor() {
       const initLevel = 1;
-      // private properties for Player class
+      // private properties for Level class
       const privateProps = {
         level: initLevel,
         enemiesNumberRange: calculateEnemiesNumberRange(initLevel),
