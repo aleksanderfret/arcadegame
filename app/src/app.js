@@ -1,11 +1,11 @@
 /**
- * @description gameEnemy holds Enemy class returned by IIFE (for encapsulation)
+ * @description GameEnemy holds Enemy class returned by IIFE (for encapsulation)
  * @param {number} track
  * @param {number} speed
  * @param {string} startEdge
  * @return {function}
  */
-const gameEnemy = ((track, speed, startEdge) => {
+const GameEnemy = (() => {
   // holds private properties of instances of Enemy class
   const priv = new WeakMap();
 
@@ -15,7 +15,7 @@ const gameEnemy = ((track, speed, startEdge) => {
    * @param {object} instance
    * @return {object}
    */
-  const _ = (instance) => priv.get(instance);
+  const _ = instance => priv.get(instance);
 
   /**
    * @description sets x property
@@ -75,10 +75,10 @@ const gameEnemy = ((track, speed, startEdge) => {
         setY(instance, initialPosition + positionShift);
         break;
       case 3:
-        setY(instance, initialPosition + positionShift * 2);
+        setY(instance, initialPosition + (positionShift * 2));
         break;
       default:
-        null;
+        break;
     }
   };
 
@@ -104,7 +104,7 @@ const gameEnemy = ((track, speed, startEdge) => {
         sprite: 'img/enemy-bug.png',
       };
 
-      //stores private properies for class instance
+      // stores private properies for class instance
       priv.set(this, privateProps);
       setStartPosition(this, startEdge, track);
     }
@@ -135,17 +135,18 @@ const gameEnemy = ((track, speed, startEdge) => {
      * @param {number} dt
      */
     update(dt) {
-      let x = this.x;
-      const speed = this.speed;
-      const start = this.startEdge;
-      if (start === 'left') {
+      let { x } = this;
+      const { speed, startEdge } = this;
+      // const speed = this.speed;
+      // const startEdge = this.startEdge;
+      if (startEdge === 'left') {
         if (x < 606) {
           x += speed * dt;
         } else {
           x = -101;
         }
       } else {
-        if (x > -101) {
+        if (x > -101) { // eslint-disable-line no-lonely-if
           x -= speed * dt;
         } else {
           x = 707;
@@ -191,11 +192,11 @@ const gameEnemy = ((track, speed, startEdge) => {
 })();
 
 /**
- * @description gamePlayer holds Player class returned by IIFE (for encapsulation)
+ * @description GamePlayer holds Player class returned by IIFE (for encapsulation)
  * @param {object} sprite
  * @return {function}
  */
-const gamePlayer = ((sprite) => {
+const GamePlayer = (() => {
   // holds private properties of instances of Player class
   const priv = new WeakMap();
 
@@ -205,7 +206,7 @@ const gamePlayer = ((sprite) => {
    * @param {object} instance
    * @return {object}
    */
-  const _ = (instance) => priv.get(instance);
+  const _ = instance => priv.get(instance);
 
   /**
    * @description sets lives property (add lives for future increase lives)
@@ -213,9 +214,11 @@ const gamePlayer = ((sprite) => {
    * @param {number} modLives // value to add to lives
    */
   const setLives = (instance, modLives) => {
-    const lives = _(instance).lives;
-    const maxLives = _(instance).maxLives;
-    _(instance).lives = (modLives < 0 && lives > 0 || modLives > 0 && lives < maxLives) ? lives + modLives : lives;
+    const { lives, maxLives } = _(instance);
+    _(instance).lives =
+      ((modLives < 0 && lives > 0)
+      || (modLives > 0 && lives < maxLives))
+        ? lives + modLives : lives;
   };
 
   /**
@@ -253,11 +256,8 @@ const gamePlayer = ((sprite) => {
    * @param {string} direction
    */
   const movementHandlerInput = (instance, direction) => {
-    const steps = _(instance).steps;
-    const maxCoords = _(instance).maxCoords;
-    const coords = _(instance).coords;
-    const isDead = _(instance).isDead;
-    if (isDead || game.isLocked) {
+    const { steps, maxCoords, coords, isDead } = _(instance);
+    if (isDead || game.isLocked) { // eslint-disable-line no-use-before-define
       return;
     }
     switch (direction) {
@@ -274,7 +274,7 @@ const gamePlayer = ((sprite) => {
         _(instance).coords.y = Math.min((coords.y + steps.y), maxCoords.maxY);
         break;
       default:
-        null;
+        break;
     }
   };
 
@@ -298,7 +298,7 @@ const gamePlayer = ((sprite) => {
           left: 20,
           right: 81,
           top: 60,
-          bottom: 143
+          bottom: 143,
         },
         steps: { // for player movements
           x: 101,
@@ -321,11 +321,10 @@ const gamePlayer = ((sprite) => {
           37: 'left',
           38: 'up',
           39: 'right',
-          40: 'down'
+          40: 'down',
         };
         movementHandlerInput(this, allowedKeys[event.keyCode]);
       });
-
     }
 
     // getters for private properties
@@ -372,15 +371,17 @@ const gamePlayer = ((sprite) => {
      * @param {string} result
      */
     spriteAnimetion(result) {
-      let interval;
       // saves standard player image
       const spriteNormal = this.sprite.normal;
       // chooses which image will be used in animation
-      const spriteAnimated = (result === 'win') ? this.sprite.win : this.sprite.lose;
+      const spriteAnimated =
+        (result === 'win') ? this.sprite.win : this.sprite.lose;
 
       // starts animation
-      interval = setInterval(() => {
-        this.sprite.normal = (this.sprite.normal === spriteAnimated) ? spriteNormal : spriteAnimated;
+      const interval = setInterval(() => {
+        this.sprite.normal =
+          (this.sprite.normal === spriteAnimated)
+            ? spriteNormal : spriteAnimated;
       }, 100);
 
       setTimeout(() => {
@@ -391,13 +392,17 @@ const gamePlayer = ((sprite) => {
       }, 750);
     }
 
-    update() {}
+    update() {} // eslint-disable-line class-methods-use-this
 
     /**
      * @description rednders player object
      */
     render() {
-      ctx.drawImage(Resources.get(this.sprite.normal), this.coords.x, this.coords.y);
+      ctx.drawImage(
+        Resources.get(this.sprite.normal),
+        this.coords.x,
+        this.coords.y,
+      );
     }
 
     /**
@@ -421,368 +426,10 @@ const gamePlayer = ((sprite) => {
 })();
 
 /**
- * @description arcadeGame holds Game class returned by IIFE (for encapsulation)
+ * @description GameLevel holds Level class returned by IIFE (for encapsulation)
  * @return {function}
  */
-const arcadeGame = (() => {
-  // holds private properties of instances of Game class
-  const priv = new WeakMap();
-
-  // private "methods" for Game class
-  /**
-   * @description returns private properties of the instance
-   * @param {object} instance
-   * @return {object}
-   */
-  const _ = (instance) => priv.get(instance);
-
-  // TODO consider to use it instead of multiple private setters
-  // const setPrivProp = (instance, propertyName, value) => {
-  //   _(instance)[propertyName] = value;
-  // };
-
-  /**
-   * @description sets isLocked property
-   * @param {object} instance
-   * @param {boolean} locked
-   */
-  const setIsLocked = (instance, locked) => {
-    _(instance).isLocked = locked;
-  };
-
-  /**
-   * @description sets isStarted property
-   * @param {object} instance
-   * @param {boolean} started
-   */
-  const setIsStarted = (instance, started) => {
-    _(instance).isStarted = started;
-  };
-
-  /**
-   * @description sets player property
-   * @param {object} instance
-   * @param {object} player
-   */
-  const setPlayer = (instance, player) => {
-    _(instance).player = player;
-  };
-
-  /**
-   * @description sets level property
-   * @param {object} instance
-   * @param {object} level
-   */
-  const setLevel = (instance, level) => {
-    _(instance).level = level;
-  };
-
-  /**
-   * @description sets enemies property
-   * @param {object} instance
-   * @param {array} enemies
-   */
-  const setEnemies = (instance, enemies) => {
-    _(instance).enemies = enemies;
-  };
-
-  /**
-   * @description gets random integer
-   * @param {number} min
-   * @param {number} max
-   */
-  const getRandomInt = (min, max) => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
-  /**
-   * @description renders game entities (player and enemies)
-   * @param {object} instance
-   */
-  const renderEntities = (instance) => {
-    _(instance).enemies.forEach(function (enemy) {
-      enemy.render();
-    });
-    _(instance).player.render();
-  };
-
-  /**
-   * @description updates game entities
-   * @param {object} instance
-   */
-  const updateEntities = (instance, dt) => {
-    _(instance).enemies.forEach((enemy) => {
-      enemy.update(dt);
-    });
-    _(instance).player.update();
-  };
-
-  /**
-   * @description creates enemies
-   * @param {object} instance
-   */
-  const createEnemies = (instance) => {
-    const enemies = _(instance).enemies;
-    const level = _(instance).level;
-    const createdEnemies = [];
-    const enemiesNumberRange = level.enemiesNumberRange; // used for drawing number of enemies
-    const enemiesSpeedRange = level.enemiesSpeedRange; // used for drawing speed of enemy
-    const enemiesNumber = getRandomInt(enemiesNumberRange[0], enemiesNumberRange[1]);
-    const newEnemiesNum = enemiesNumber - enemies.length; // number of new enemies which must be added
-    let hasOppositeDirection = false; // used for setting direction of movement
-    let enemyTrack; // used for setting track of movement
-    let enemySpeed;
-
-    // creates new enemies, first determining values of constructor params
-    for (let i = 1; i <= newEnemiesNum; i++) {
-      if (enemies.length >= 4) {
-        hasOppositeDirection = Boolean(getRandomInt(0, 1));
-      }
-      enemySpeed = getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
-
-      if (enemies.length === 0 && i <= 3) {
-        enemyTrack = i;
-      } else {
-        enemyTrack = getRandomInt(1, 3);
-      }
-
-      const startEdge = hasOppositeDirection ? 'right' : 'left';
-
-      createdEnemies.push(new gameEnemy(enemyTrack, enemySpeed, startEdge));
-    }
-
-    // stores all enemies (old and new ones) in the private enemies property
-    setEnemies(instance, [...enemies, ...createdEnemies]);
-  };
-
-  /**
-   * @description checks if there is a collision between the player and the enemies
-   * @param {object} instance
-   */
-  const checkCollision = (instance) => {
-    const player = _(instance).player;
-    const enemies = _(instance).enemies;
-    for (const enemy of enemies) {
-      if (player.getEdge('left') <= enemy.getEdge('right') &&
-        player.getEdge('right') >= enemy.getEdge('left') &&
-        player.getEdge('top') <= enemy.getEdge('bottom') &&
-        player.getEdge('bottom') >= enemy.getEdge('top')) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  /**
-   * @description checks if player is dead or lost life only ;-)
-   * @param {object} instance
-   */
-  const checkIsDaed = (instance) => {
-    let isDead = false;
-    const player = _(instance).player;
-    player.die();
-    player.decreaseLives();
-
-    if (player.lives === 0) {
-      isDead = true;
-    } else {
-      player.spriteAnimetion('lose');
-    }
-    return isDead;
-  };
-
-  /**
-   * @description checks if the player has reached the goal
-   * @param {object} instance
-   */
-  const checkGoal = (instance) => {
-    const player = _(instance).player;
-    if (player.coords.y === player.maxCoords.minY) {
-      return true;
-    }
-  };
-
-  /**
-   * @description increases the level
-   * @param {object} instance
-   */
-  const increaseLevel = (instance) => {
-    const level = _(instance).level;
-    const player = _(instance).player;
-    const enemies = _(instance).enemies;
-    level.update();
-
-    //increases speed of existing enemies
-    enemies.forEach((enemy) => {
-      const speedRange = level.enemiesNumberRange;
-      enemy.increaseSpeed(getRandomInt(speedRange[0], speedRange[1]));
-    });
-
-    // animates the player
-    player.spriteAnimetion('win');
-    resetRound(instance, true);
-  };
-
-  /**
-   * @description resets game round (stage)
-   * @param {object} instance
-   * @param {boolean} isLevelIncreased
-   */
-  const resetRound = (instance, isLevelIncreased) => {
-    setTimeout(() => {
-      if (isLevelIncreased) {
-        // creates new enemies
-        createEnemies(instance);
-      }
-
-      // resets the player position
-      _(instance).player.reset();
-
-      //Unlock the game
-      setIsLocked(instance, false);
-    }, 1000);
-  };
-
-  /**
-   * @description displays game intro to show game tutorial and enable game start
-   * @param {object} instance
-   */
-  const startIntro = (instance) => {
-    _(instance).panel.displayIntroModal();
-  };
-
-  /**
-   * @description stops the game and resets its props
-   * @param {object} instance
-   */
-  const stopGame = (instance) => {
-    setIsStarted(instance, false);
-    setEnemies(instance, []);
-    setPlayer(instance, null);
-    setLevel(instance, null);
-  };
-
-  /**
-   * @description ends game when player win or lose
-   * @param {object} instance
-   */
-  const endGame = (instance, result) => {
-    const enemies = _(instance).enemies;
-    const player = _(instance).player;
-    const level = _(instance).level;
-    const panel = _(instance).panel;
-    const success = (result === 'win') ? true : false;
-    enemies.forEach((enemy) => {
-      enemy.stop();
-    });
-    player.spriteAnimetion(result);
-    setTimeout(() => {
-      panel.displayResultModal(success, level.level, player.lives, 0, 0);
-      stopGame(instance);
-    }, 1000);
-  };
-
-  class Game {
-    constructor() {
-      // private properties for Game class
-      const privateProps = {
-        panel: new gamePanel(),
-        isStarted: false,
-        isLocked: false,
-        level: null,
-        player: null,
-        maxLevel: 12,
-        enemies: [],
-      }
-      // stores private properties for class instance
-      priv.set(this, privateProps);
-      // turns on the modal with game tutorial
-      startIntro(this);
-    }
-
-    // getters for private properties
-    get isStarted() {
-      return _(this).isStarted;
-    }
-    get isLocked() {
-      return _(this).isLocked;
-    }
-    get panel() {
-      return _(this).panel;
-    }
-    get level() {
-      return _(this).level;
-    }
-    get player() {
-      return _(this).player;
-    }
-    get enemies() {
-      return [..._(this).enemies];
-    }
-    get maxLevel() {
-      return _(this).maxLevel;
-    }
-
-    // public methods
-    /**
-     * @description rednders game entities and game info (level, lives)
-     */
-    render() {
-      if (this.isStarted) {
-        renderEntities(this);
-        this.panel.render(this.level.level, this.player.lives);
-      }
-    }
-
-    /**
-     * @description updates game entities
-     *   and checks the game's incidents: collision or pass the level
-     */
-    update(dt) {
-      if (!this.isStarted) {
-        return;
-      }
-      updateEntities(this, dt);
-      if (this.isLocked) {
-        return
-      }
-      if (checkCollision(this)) {
-        setIsLocked(this, true);
-        if (checkIsDaed(this)) {
-          endGame(this, 'lose');
-        } else {
-          resetRound(this, false);
-        }
-      } else if (checkGoal(this)) {
-        setIsLocked(this, true);
-        if (this.level.level === this.maxLevel) {
-          endGame(this, 'win');
-        } else {
-          increaseLevel(this);
-        }
-      }
-    }
-
-    /**
-     * @description starts the game
-     * @param {object} instance
-     */
-    startGame(sprite) {
-      setLevel(this, new gameLevel());
-      createEnemies(this);
-      setPlayer(this, new gamePlayer(sprite));
-      setIsStarted(this, true);
-      setIsLocked(this, false)
-    }
-  }
-  return Game;
-})();
-
-/**
- * @description gameLevel holds Level class returned by IIFE (for encapsulation)
- * @return {function}
- */
-const gameLevel = (() => {
+const GameLevel = (() => {
   // holds private properties of instances of Level class
   const priv = new WeakMap();
 
@@ -792,14 +439,14 @@ const gameLevel = (() => {
    * @param {object} instance
    * @return {object}
    */
-  const _ = (instance) => priv.get(instance);
+  const _ = instance => priv.get(instance);
 
   /**
    * @description sets level property
    * @param {object} instance
    */
   const setLevel = (instance) => {
-    _(instance).level++;
+    _(instance).level += 1;
   };
 
   /**
@@ -892,7 +539,7 @@ const gameLevel = (() => {
         level: initLevel,
         enemiesNumberRange: calculateEnemiesNumberRange(initLevel),
         enemiesSpeedRange: calculateEnemiesSpeedRange(initLevel),
-      }
+      };
 
       // stores private properties for class instance
       priv.set(this, privateProps);
@@ -923,10 +570,10 @@ const gameLevel = (() => {
 })();
 
 /**
- * @description gamePanel holds Panel class returned by IIFE (for encapsulation)
+ * @description GamePanel holds Panel class returned by IIFE (for encapsulation)
  * @return {function}
  */
-const gamePanel = (() => {
+const GamePanel = (() => {
   // holds private properties of instances of Panel class
   const priv = new WeakMap();
 
@@ -936,7 +583,7 @@ const gamePanel = (() => {
    * @param {object} instance
    * @return {object}
    */
-  const _ = (instance) => priv.get(instance);
+  const _ = instance => priv.get(instance);
 
   /**
    * @description sets url for src attribute of img
@@ -974,11 +621,10 @@ const gamePanel = (() => {
    * @param {string} key
    */
   const startOptionsHandler = (instance, key) => {
-    const sprites = _(instance).sprites;
-    const spriteIndex = _(instance).spriteIndex;
+    const { sprites, spriteIndex } = _(instance);
     if (key === 'enter') {
       closeModal(instance);
-      game.startGame(sprites[spriteIndex]);
+      game.startGame(sprites[spriteIndex]); // eslint-disable-line no-use-before-define
     } else if (key === 'space') {
       const index = (spriteIndex === sprites.length - 1) ? 0 : spriteIndex + 1;
       setSpriteSrc(instance, sprites[index].normal);
@@ -999,42 +645,42 @@ const gamePanel = (() => {
         spriteImages: document.querySelectorAll('.sprite img'),
 
         sprites: [{ // sprites - images urls for the players
-            normal: 'img/char-boy.png',
-            lose: 'img/char-boy-lose.png',
-            win: 'img/char-boy-win.png',
-          },
-          {
-            normal: 'img/char-cat-girl.png',
-            lose: 'img/char-cat-girl-lose.png',
-            win: 'img/char-cat-girl-win.png',
-          },
-          {
-            normal: 'img/char-horn-girl.png',
-            lose: 'img/char-horn-girl-lose.png',
-            win: 'img/char-horn-girl-win.png',
-          },
-          {
-            normal: 'img/char-pink-girl.png',
-            lose: 'img/char-pink-girl-lose.png',
-            win: 'img/char-pink-girl-win.png',
-          },
-          {
-            normal: 'img/char-princess-girl.png',
-            lose: 'img/char-princess-girl-lose.png',
-            win: 'img/char-princess-girl-win.png',
-          }
+          normal: 'img/char-boy.png',
+          lose: 'img/char-boy-lose.png',
+          win: 'img/char-boy-win.png',
+        },
+        {
+          normal: 'img/char-cat-girl.png',
+          lose: 'img/char-cat-girl-lose.png',
+          win: 'img/char-cat-girl-win.png',
+        },
+        {
+          normal: 'img/char-horn-girl.png',
+          lose: 'img/char-horn-girl-lose.png',
+          win: 'img/char-horn-girl-win.png',
+        },
+        {
+          normal: 'img/char-pink-girl.png',
+          lose: 'img/char-pink-girl-lose.png',
+          win: 'img/char-pink-girl-win.png',
+        },
+        {
+          normal: 'img/char-princess-girl.png',
+          lose: 'img/char-princess-girl-lose.png',
+          win: 'img/char-princess-girl-win.png',
+        },
         ],
         spriteIndex: 0,
       };
 
-      //stores private properties for class instance
+      // stores private properties for class instance
       priv.set(this, privateProps);
 
       // listener for enter/space keyup event
       this.modalKeyHandler = (event) => {
         const allowedKeys = {
           32: 'space',
-          13: 'enter'
+          13: 'enter',
         };
         startOptionsHandler(this, allowedKeys[event.keyCode]);
       };
@@ -1072,14 +718,20 @@ const gamePanel = (() => {
      * @param {number} level
      * @param {number} lives
      */
-    render(level, lives) {
-      ctx.font = "20px Ubuntu";
-      ctx.fillStyle = "white";
+    render(level, lives) { // eslint-disable-line class-methods-use-this
+      ctx.font = '20px Ubuntu';
+      ctx.fillStyle = 'white';
       ctx.fillText(`Level: ${level}/12`, 10, 33);
-      ctx.fillText(`Lives:`, 150, 33);
+      ctx.fillText('Lives:', 150, 33);
       const step = 35;
       for (let i = 0; i < lives; i++) {
-        ctx.drawImage(Resources.get('img/Heart.png'), 205 + step * i, 0, 30, 50);
+        ctx.drawImage(
+          Resources.get('img/Heart.png'),
+          205 + (step * i),
+          0,
+          30,
+          50,
+        );
       }
     }
 
@@ -1088,12 +740,13 @@ const gamePanel = (() => {
      * @param {boolean} success
      * @param {number} level
      * @param {number} lives
-     * @param {object} gems // for future use
-     * @param {number} points // for future use
+     * @param {object} gems // TODO for future use
+     * @param {number} points // TODO for future use
      */
-    displayResultModal(success, level, lives, gems, points) {
+    displayResultModal(success, level, lives, gems, points) { // eslint-disable-line no-unused-vars
       document.addEventListener('keyup', this.modalKeyHandler);
-      const title = (success) ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
+      const title = (success)
+        ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
       this.title.textContent = title;
       this.levelResult.textContent = level;
       this.livesResult.textContent = lives;
@@ -1111,5 +764,360 @@ const gamePanel = (() => {
   return Panel;
 })();
 
+/**
+ * @description ArcadeGame holds Game class returned by IIFE (for encapsulation)
+ * @return {function}
+ */
+const ArcadeGame = (() => {
+  // holds private properties of instances of Game class
+  const priv = new WeakMap();
+
+  // private "methods" for Game class
+  /**
+   * @description returns private properties of the instance
+   * @param {object} instance
+   * @return {object}
+   */
+  const _ = instance => priv.get(instance);
+
+  // TODO consider to use it instead of multiple private setters
+  // const setPrivProp = (instance, propertyName, value) => {
+  //   _(instance)[propertyName] = value;
+  // };
+
+  /**
+   * @description sets isLocked property
+   * @param {object} instance
+   * @param {boolean} locked
+   */
+  const setIsLocked = (instance, locked) => {
+    _(instance).isLocked = locked;
+  };
+
+  /**
+   * @description sets isStarted property
+   * @param {object} instance
+   * @param {boolean} started
+   */
+  const setIsStarted = (instance, started) => {
+    _(instance).isStarted = started;
+  };
+
+  /**
+   * @description sets player property
+   * @param {object} instance
+   * @param {object} player
+   */
+  const setPlayer = (instance, player) => {
+    _(instance).player = player;
+  };
+
+  /**
+   * @description sets level property
+   * @param {object} instance
+   * @param {object} level
+   */
+  const setLevel = (instance, level) => {
+    _(instance).level = level;
+  };
+
+  /**
+   * @description sets enemies property
+   * @param {object} instance
+   * @param {array} enemies
+   */
+  const setEnemies = (instance, enemies) => {
+    _(instance).enemies = enemies;
+  };
+
+  /**
+   * @description gets random integer
+   * @param {number} min
+   * @param {number} max
+   */
+  const getRandomInt = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1)) + min;
+
+
+  /**
+   * @description renders game entities (player and enemies)
+   * @param {object} instance
+   */
+  const renderEntities = (instance) => {
+    _(instance).enemies.forEach((enemy) => {
+      enemy.render();
+    });
+    _(instance).player.render();
+  };
+
+  /**
+   * @description updates game entities
+   * @param {object} instance
+   */
+  const updateEntities = (instance, dt) => {
+    _(instance).enemies.forEach((enemy) => {
+      enemy.update(dt);
+    });
+    _(instance).player.update();
+  };
+
+  /**
+   * @description creates enemies
+   * @param {object} instance
+   */
+  const createEnemies = (instance) => {
+    const { enemies, level } = _(instance);
+    const createdEnemies = [];
+    const { enemiesNumberRange, enemiesSpeedRange } = level; // used for drawing speed and number of enemies
+    const enemiesNumber = getRandomInt(
+      enemiesNumberRange[0],
+      enemiesNumberRange[1],
+    );
+    const newEnemiesNum = enemiesNumber - enemies.length; // number of new enemies which must be added
+    let hasOppositeDirection = false; // used for setting direction of movement
+    let enemyTrack; // used for setting track of movement
+    let enemySpeed;
+
+    // creates new enemies, first determining values of constructor params
+    for (let i = 1; i <= newEnemiesNum; i++) {
+      if (enemies.length >= 4) {
+        hasOppositeDirection = Boolean(getRandomInt(0, 1));
+      }
+      enemySpeed = getRandomInt(enemiesSpeedRange[0], enemiesSpeedRange[1]);
+
+      if (enemies.length === 0 && i <= 3) {
+        enemyTrack = i;
+      } else {
+        enemyTrack = getRandomInt(1, 3);
+      }
+
+      const startEdge = hasOppositeDirection ? 'right' : 'left';
+
+      createdEnemies.push(new GameEnemy(enemyTrack, enemySpeed, startEdge));
+    }
+
+    // stores all enemies (old and new ones) in the private enemies property
+    setEnemies(instance, [...enemies, ...createdEnemies]);
+  };
+
+  /**
+   * @description checks if there is a collision between the player and the enemies
+   * @param {object} instance
+   */
+  const checkCollision = (instance) => {
+    const { player, enemies } = _(instance);
+    for (const enemy of enemies) { // eslint-disable-line no-restricted-syntax
+      if (player.getEdge('left') <= enemy.getEdge('right') &&
+        player.getEdge('right') >= enemy.getEdge('left') &&
+        player.getEdge('top') <= enemy.getEdge('bottom') &&
+        player.getEdge('bottom') >= enemy.getEdge('top')) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /**
+   * @description checks if player is dead or lost life only ;-)
+   * @param {object} instance
+   */
+  const checkIsDaed = (instance) => {
+    let isDead = false;
+    const { player } = _(instance);
+    player.die();
+    player.decreaseLives();
+
+    if (player.lives === 0) {
+      isDead = true;
+    } else {
+      player.spriteAnimetion('lose');
+    }
+    return isDead;
+  };
+
+  /**
+   * @description checks if the player has reached the goal
+   * @param {object} instance
+   */
+  const checkGoal = (instance) => {
+    const { player } = _(instance);
+    let isGoal = false;
+    if (player.coords.y === player.maxCoords.minY) {
+      isGoal = true;
+    }
+    return isGoal;
+  };
+
+  /**
+   * @description increases the level
+   * @param {object} instance
+   */
+  const increaseLevel = (instance) => {
+    const { level, player, enemies } = _(instance);
+    level.update();
+
+    // increases speed of existing enemies
+    enemies.forEach((enemy) => {
+      const speedRange = level.enemiesNumberRange;
+      enemy.increaseSpeed(getRandomInt(speedRange[0], speedRange[1]));
+    });
+
+    // animates the player
+    player.spriteAnimetion('win');
+    resetRound(instance, true); // eslint-disable-line no-use-before-define
+  };
+
+  /**
+   * @description resets game round (stage)
+   * @param {object} instance
+   * @param {boolean} isLevelIncreased
+   */
+  const resetRound = (instance, isLevelIncreased) => {
+    setTimeout(() => {
+      if (isLevelIncreased) {
+        // creates new enemies
+        createEnemies(instance);
+      }
+
+      // resets the player position
+      _(instance).player.reset();
+
+      // unlocks the game
+      setIsLocked(instance, false);
+    }, 1000);
+  };
+
+  /**
+   * @description displays game intro to show game tutorial and enable game start
+   * @param {object} instance
+   */
+  const startIntro = (instance) => {
+    _(instance).panel.displayIntroModal();
+  };
+
+  /**
+   * @description stops the game and resets its props
+   * @param {object} instance
+   */
+  const stopGame = (instance) => {
+    setIsStarted(instance, false);
+    setEnemies(instance, []);
+    setPlayer(instance, null);
+    setLevel(instance, null);
+  };
+
+  /**
+   * @description ends game when player win or lose
+   * @param {object} instance
+   */
+  const endGame = (instance, result) => {
+    const { enemies, player, level, panel } = _(instance);
+    // const success = (result === 'win') ? true : false;
+    const success = result === 'win';
+    enemies.forEach((enemy) => {
+      enemy.stop();
+    });
+    player.spriteAnimetion(result);
+    setTimeout(() => {
+      panel.displayResultModal(success, level.level, player.lives, 0, 0);
+      stopGame(instance);
+    }, 1000);
+  };
+
+  class Game {
+    constructor() {
+      // private properties for Game class
+      const privateProps = {
+        panel: new GamePanel(),
+        isStarted: false,
+        isLocked: false,
+        level: null,
+        player: null,
+        maxLevel: 12,
+        enemies: [],
+      };
+      // stores private properties for class instance
+      priv.set(this, privateProps);
+      // turns on the modal with game tutorial
+      startIntro(this);
+    }
+
+    // getters for private properties
+    get isStarted() {
+      return _(this).isStarted;
+    }
+    get isLocked() {
+      return _(this).isLocked;
+    }
+    get panel() {
+      return _(this).panel;
+    }
+    get level() {
+      return _(this).level;
+    }
+    get player() {
+      return _(this).player;
+    }
+    get enemies() {
+      return [..._(this).enemies];
+    }
+    get maxLevel() {
+      return _(this).maxLevel;
+    }
+
+    // public methods
+    /**
+     * @description rednders game entities and game info (level, lives)
+     */
+    render() {
+      if (this.isStarted) {
+        renderEntities(this);
+        this.panel.render(this.level.level, this.player.lives);
+      }
+    }
+
+    /**
+     * @description updates game entities
+     *   and checks the game's incidents: collision or pass the level
+     */
+    update(dt) {
+      if (!this.isStarted) {
+        return;
+      }
+      updateEntities(this, dt);
+      if (this.isLocked) {
+        return;
+      }
+      if (checkCollision(this)) {
+        setIsLocked(this, true);
+        if (checkIsDaed(this)) {
+          endGame(this, 'lose');
+        } else {
+          resetRound(this, false);
+        }
+      } else if (checkGoal(this)) {
+        setIsLocked(this, true);
+        if (this.level.level === this.maxLevel) {
+          endGame(this, 'win');
+        } else {
+          increaseLevel(this);
+        }
+      }
+    }
+
+    /**
+     * @description starts the game
+     * @param {object} instance
+     */
+    startGame(sprite) {
+      setLevel(this, new GameLevel());
+      createEnemies(this);
+      setPlayer(this, new GamePlayer(sprite));
+      setIsStarted(this, true);
+      setIsLocked(this, false);
+    }
+  }
+  return Game;
+})();
 // creates game instance - it controls game initialization itself
-const game = new arcadeGame();
+const game = new ArcadeGame();
