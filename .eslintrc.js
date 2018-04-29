@@ -1,7 +1,6 @@
 module.exports = {
   "extends": "airbnb-base",
   "rules": {
-    "linebreak-style": ["error", "windows"],
     "object-curly-newline": ["error", {
       "ObjectExpression": {
         "multiline": true,

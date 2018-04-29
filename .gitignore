@@ -6,3 +6,4 @@
 /app/js/*
 !/app/css
 /app/css/*
+/.vscode
