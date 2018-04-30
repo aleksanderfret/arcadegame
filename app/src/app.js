@@ -1,15 +1,12 @@
 /**
- * @description GameEnemy holds Enemy class returned by IIFE (for encapsulation)
- * @param {number} track
- * @param {number} speed
- * @param {string} startEdge
+ * @description GameEntity holds Entity class returned by IIFE (for encapsulation)
  * @return {function}
  */
-const GameEnemy = (() => {
-  // holds private properties of instances of Enemy class
-  const priv = new WeakMap();
+const GameEntity = (() => {
+  let protectedMembers; // for sharing protected props with subclasses
+  const priv = new WeakMap(); // holds private props of instances of Entity class
 
-  // private "methods" for Enemy class
+  // private "methods" for Entity class
   /**
    * @description returns private properties of the instance
    * @param {object} instance
@@ -36,12 +33,18 @@ const GameEnemy = (() => {
   };
 
   /**
-   * @description sets speed property
+   * @description sets edges property
    * @param {object} instance
-   * @param {number} speed
+   * @param {number} left
+   * @param {number} right
+   * @param {number} top
+   * @param {number} bottom
    */
-  const setSpeed = (instance, speed) => {
-    _(instance).speed = speed;
+  const setEdges = (instance, left, right, top, bottom) => {
+    _(instance).edges.left = left;
+    _(instance).edges.right = right;
+    _(instance).edges.top = top;
+    _(instance).edges.bottom = bottom;
   };
 
   /**
@@ -51,6 +54,95 @@ const GameEnemy = (() => {
    */
   const setSprite = (instance, sprite) => {
     _(instance).sprite = sprite;
+  };
+
+  class Entity {
+    /**
+     * @param {object} startEdge
+     */
+    constructor(protect) {
+      const privateProps = { // private properties for Entity class
+        x: 0,
+        y: 0,
+        edges: { // to detect collision
+          left: 0,
+          right: 101,
+          top: 0,
+          bottom: 171,
+        },
+        sprite: '',
+      };
+      priv.set(this, privateProps); // stores private properties for class instance
+
+      // sets the props/methods available in child classes
+      protectedMembers = protect || {};
+      protectedMembers.setX = setX;
+      protectedMembers.setY = setY;
+      protectedMembers.setSprite = setSprite;
+      protectedMembers.setEdges = setEdges;
+    }
+
+    // getters for private properties
+    get x() {
+      return _(this).x;
+    }
+    get y() {
+      return _(this).y;
+    }
+    get sprite() {
+      return _(this).sprite;
+    }
+    get edges() {
+      return _(this).edges;
+    }
+
+    // public methods
+    /**
+     * @description gets inner coords of entity edges
+     * @param {string} edge
+     * @return {number}
+     */
+    getEdge(edge) {
+      const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
+      return this[coord] + this.edges[edge];
+    }
+
+    /**
+     * @description rednders entity object
+     */
+    render() {
+      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+  }
+  return Entity;
+})();
+
+/**
+ * @description GameEnemy holds Enemy class returned by IIFE (for encapsulation)
+ * @param {number} track
+ * @param {number} speed
+ * @param {string} startEdge
+ * @return {function}
+ */
+const GameEnemy = (() => {
+  const priv = new WeakMap(); // holds private props of instances of Enemy class
+  const parent = {}; // holds protected parents props/methods
+
+  // private "methods" for Enemy class
+  /**
+   * @description returns private properties of the instance
+   * @param {object} instance
+   * @return {object}
+   */
+  const _ = instance => priv.get(instance);
+
+  /**
+   * @description sets speed property
+   * @param {object} instance
+   * @param {number} speed
+   */
+  const setSpeed = (instance, speed) => {
+    _(instance).speed = speed;
   };
 
   /**
@@ -63,70 +155,53 @@ const GameEnemy = (() => {
     const initialPosition = 63;
     const positionShift = 83;
     const rightPosition = 707;
+    const leftPosition = -101;
     if (startEdge === 'right') {
-      setX(instance, rightPosition);
-      setSprite(instance, 'img/enemy-bug2.png');
+      parent.setX(instance, rightPosition);
+      parent.setSprite(instance, 'img/enemy-bug2.png');
+    } else {
+      parent.setX(instance, leftPosition);
+      parent.setSprite(instance, 'img/enemy-bug.png');
     }
     switch (track) {
       case 1:
-        setY(instance, initialPosition);
+        parent.setY(instance, initialPosition);
         break;
       case 2:
-        setY(instance, initialPosition + positionShift);
+        parent.setY(instance, initialPosition + positionShift);
         break;
       case 3:
-        setY(instance, initialPosition + (positionShift * 2));
+        parent.setY(instance, initialPosition + (positionShift * 2));
         break;
       default:
         break;
     }
   };
-
-  class Enemy {
+  class Enemy extends GameEntity {
     /**
      * @param {number} track
      * @param {number} speed
      * @param {string} startEdge
      */
     constructor(track, speed, startEdge = 'left') {
-      // private properties for Enemy class
-      const privateProps = {
-        edges: { // edges - to detect collision
-          left: 0,
-          right: 101,
-          top: 74,
-          bottom: 146,
-        },
-        x: -101, // cords - to set position and movement
-        y: 63, // as above
+      super(parent);
+      const privateProps = { // private properties for Enemy class
         speed,
         startEdge, // startEdge to set direction of movements
-        sprite: 'img/enemy-bug.png',
       };
 
       // stores private properies for class instance
       priv.set(this, privateProps);
       setStartPosition(this, startEdge, track);
+      parent.setEdges(this, 0, 101, 74, 146);
     }
 
     // getters for private properties
     get startEdge() {
       return _(this).startEdge;
     }
-    get x() {
-      return _(this).x;
-    }
-    get y() {
-      return _(this).y;
-    }
     get speed() {
       return _(this).speed;
-    }
-    get sprite() {
-      return _(this).sprite;
-    }
-    get edges() {
-      return _(this).edges;
     }
 
     // public methods
@@ -137,8 +212,6 @@ const GameEnemy = (() => {
     update(dt) {
       let { x } = this;
       const { speed, startEdge } = this;
-      // const speed = this.speed;
-      // const startEdge = this.startEdge;
       if (startEdge === 'left') {
         if (x < 606) {
           x += speed * dt;
@@ -152,7 +225,7 @@ const GameEnemy = (() => {
           x = 707;
         }
       }
-      setX(this, x);
+      parent.setX(this, x);
     }
 
     /**
@@ -165,27 +238,10 @@ const GameEnemy = (() => {
     }
 
     /**
-     * @description rednders enemy object
-     */
-    render() {
-      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
-
-    /**
      * @description stops enemy
      */
     stop() {
       setSpeed(this, 0);
-    }
-
-    /**
-     * @description gets inner coords of enemy edges
-     * @param {string} edge
-     * @return {number}
-     */
-    getEdge(edge) {
-      const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
-      return this[coord] + this.edges[edge];
     }
   }
   return Enemy;
@@ -197,8 +253,8 @@ const GameEnemy = (() => {
  * @return {function}
  */
 const GamePlayer = (() => {
-  // holds private properties of instances of Player class
-  const priv = new WeakMap();
+  const priv = new WeakMap(); // holds private properties of instances of Player class
+  const parent = {}; // holds protected parents props/methods
 
   // private "methods" for Player class
   /**
@@ -231,60 +287,42 @@ const GamePlayer = (() => {
   };
 
   /**
-   * @description sets coords x, y
-   * @param {object} instance
-   * @param {number} x
-   * @param {number} y
-   */
-  const setCoords = (instance, x, y) => {
-    _(instance).coords.x = x;
-    _(instance).coords.y = y;
-  };
-
-  /**
-   * @description sets sprite property
-   * @param {object} instance
-   * @param {string} sprite // image url
-   */
-  const setSpriteNormal = (instance, sprite) => {
-    _(instance).sprite.normal = sprite;
-  };
-
-  /**
    * @description sets coords x & y of the player
    * @param {object} instance
    * @param {string} direction
    */
   const movementHandlerInput = (instance, direction) => {
-    const { steps, maxCoords, coords, isDead } = _(instance);
+    const { steps, maxCoords, isDead } = _(instance);
+    const { x, y } = instance;
     if (isDead || game.isLocked) { // eslint-disable-line no-use-before-define
       return;
     }
+
     switch (direction) {
       case 'left':
-        _(instance).coords.x = Math.max((coords.x - steps.x), maxCoords.minX);
+        parent.setX(instance, Math.max((x - steps.x), maxCoords.minX));
         break;
       case 'right':
-        _(instance).coords.x = Math.min((coords.x + steps.x), maxCoords.maxX);
+        parent.setX(instance, Math.min((x + steps.x), maxCoords.maxX));
         break;
       case 'up':
-        _(instance).coords.y = Math.max((coords.y - steps.y), maxCoords.minY);
+        parent.setY(instance, Math.max((y - steps.y), maxCoords.minY));
         break;
       case 'down':
-        _(instance).coords.y = Math.min((coords.y + steps.y), maxCoords.maxY);
+        parent.setY(instance, Math.min((y + steps.y), maxCoords.maxY));
         break;
       default:
         break;
     }
   };
 
-  class Player {
+  class Player extends GameEntity {
     /**
      * @param {object} sprite
      */
     constructor(sprite) {
-      // private properties for Player class
-      const privateProps = {
+      super(parent);
+      const privateProps = { // private properties for Player class
         maxLives: 3,
         lives: 3,
         isDead: false,
@@ -294,25 +332,19 @@ const GamePlayer = (() => {
           maxX: 404,
           maxY: 405,
         },
-        edges: { // to detect collision
-          left: 20,
-          right: 81,
-          top: 60,
-          bottom: 143,
-        },
         steps: { // for player movements
           x: 101,
           y: 83,
         },
-        coords: { // initial coords for the player position
-          x: 202,
-          y: 405,
+        spriteAnimate: { // object with the player images
+          win: sprite.win,
+          lose: sprite.lose,
         },
-        sprite, // object with the player images
       };
-
       // stores private properties for class instance
       priv.set(this, privateProps);
+      parent.setSprite(this, sprite.normal);
+      parent.setEdges(this, 20, 81, 60, 143);
       this.reset();
 
       // adds listener for arrow keyup event to manage movement of the player
@@ -337,17 +369,11 @@ const GamePlayer = (() => {
     get maxCoords() {
       return _(this).maxCoords;
     }
-    get edges() {
-      return _(this).edges;
-    }
     get steps() {
       return _(this).steps;
     }
-    get coords() {
-      return _(this).coords;
-    }
-    get sprite() {
-      return _(this).sprite;
+    get spriteAnimate() {
+      return _(this).spriteAnimate;
     }
 
     // public methods
@@ -356,7 +382,8 @@ const GamePlayer = (() => {
      */
     reset() {
       setIsDead(this, false);
-      setCoords(this, 202, 405);
+      parent.setX(this, 202);
+      parent.setY(this, 405);
     }
 
     /**
@@ -372,48 +399,28 @@ const GamePlayer = (() => {
      */
     spriteAnimetion(result) {
       // saves standard player image
-      const spriteNormal = this.sprite.normal;
+      const { sprite } = this;
       // chooses which image will be used in animation
       const spriteAnimated =
-        (result === 'win') ? this.sprite.win : this.sprite.lose;
+        (result === 'win') ? this.spriteAnimate.win : this.spriteAnimate.lose;
 
       // starts animation
       const interval = setInterval(() => {
-        this.sprite.normal =
-          (this.sprite.normal === spriteAnimated)
-            ? spriteNormal : spriteAnimated;
+        parent.setSprite(
+          this,
+          (this.sprite === spriteAnimated) ? sprite : spriteAnimated,
+        );
       }, 100);
 
       setTimeout(() => {
         // stops animation
         clearInterval(interval);
         // sets a standard image back
-        setSpriteNormal(this, spriteNormal);
+        parent.setSprite(this, sprite);
       }, 750);
     }
 
     update() {} // eslint-disable-line class-methods-use-this
-
-    /**
-     * @description rednders player object
-     */
-    render() {
-      ctx.drawImage(
-        Resources.get(this.sprite.normal),
-        this.coords.x,
-        this.coords.y,
-      );
-    }
-
-    /**
-     * @description gets inner coords of player edges
-     * @param {string} edge
-     * @return {number}
-     */
-    getEdge(edge) {
-      const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
-      return this.coords[coord] + this.edges[edge];
-    }
 
     /**
      * @description reduces the number of lives
@@ -942,7 +949,7 @@ const ArcadeGame = (() => {
   const checkGoal = (instance) => {
     const { player } = _(instance);
     let isGoal = false;
-    if (player.coords.y === player.maxCoords.minY) {
+    if (player.y === player.maxCoords.minY) {
       isGoal = true;
     }
     return isGoal;
