@@ -1,7 +1,7 @@
 # Arcade Game
-This game was created as a project within the Google Scholarship Programm.
+This game was created as a project within the Google Scholarship Programm. It's focused on OOP with ES6 (especially encapsulation and inheritance)
 ## Version
-1.0.0 - 2018.04.27
+1.0.1 - 2018.05.01
 ## Play the game
 [www.aracadegame.fret.com.pl](http://www.arcadegame.fret.com.pl)
 ## Game instructions
