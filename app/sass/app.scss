@@ -110,7 +110,18 @@ section {
 }
 
 body {
-  line-height: 1;
+  // === FONTS ===
+$text-font: "Ubuntu", sans-serif;
+$text-size: 18px;
+$text-weight: 700;
+
+// === COLORS ===
+$text-color: #fff;
+$backdrop-color: rgba(0, 0, 0, 0.75);
+$modal-bg-color: #fff;
+$modal-txt-color: #000;
+$shadow-color: rgba(0, 0, 0, 0.85);
+$background-color: #000;
 }
 
 ol,
