@@ -61,18 +61,16 @@ const GameEntity = (() => {
      * @param {object} startEdge
      */
     constructor(protect) {
-      const privateProps = {
-        // private properties for Entity class
+      const privateProps = { // private properties for Entity class
         x: 0,
         y: 0,
-        edges: {
-          // to detect collision
+        edges: { // to detect collision
           left: 0,
           right: 101,
           top: 0,
-          bottom: 171
+          bottom: 171,
         },
-        sprite: ""
+        sprite: '',
       };
       priv.set(this, privateProps); // stores private properties for class instance
 
@@ -105,7 +103,7 @@ const GameEntity = (() => {
      * @return {number}
      */
     getEdge(edge) {
-      const coord = ["left", "right"].includes(edge) ? "x" : "y";
+      const coord = (['left', 'right'].includes(edge)) ? 'x' : 'y';
       return this[coord] + this.edges[edge];
     }
 
@@ -158,12 +156,12 @@ const GameEnemy = (() => {
     const positionShift = 83;
     const rightPosition = 707;
     const leftPosition = -101;
-    if (startEdge === "right") {
+    if (startEdge === 'right') {
       parent.setX(instance, rightPosition);
-      parent.setSprite(instance, "img/enemy-bug2.png");
+      parent.setSprite(instance, 'img/enemy-bug2.png');
     } else {
       parent.setX(instance, leftPosition);
-      parent.setSprite(instance, "img/enemy-bug.png");
+      parent.setSprite(instance, 'img/enemy-bug.png');
     }
     switch (track) {
       case 1:
@@ -173,7 +171,7 @@ const GameEnemy = (() => {
         parent.setY(instance, initialPosition + positionShift);
         break;
       case 3:
-        parent.setY(instance, initialPosition + positionShift * 2);
+        parent.setY(instance, initialPosition + (positionShift * 2));
         break;
       default:
         break;
@@ -185,12 +183,11 @@ const GameEnemy = (() => {
      * @param {number} speed
      * @param {string} startEdge
      */
-    constructor(track, speed, startEdge = "left") {
+    constructor(track, speed, startEdge = 'left') {
       super(parent);
-      const privateProps = {
-        // private properties for Enemy class
+      const privateProps = { // private properties for Enemy class
         speed,
-        startEdge // startEdge to set direction of movements
+        startEdge, // startEdge to set direction of movements
       };
 
       // stores private properies for class instance
@@ -215,15 +212,14 @@ const GameEnemy = (() => {
     update(dt) {
       let { x } = this;
       const { speed, startEdge } = this;
-      if (startEdge === "left") {
+      if (startEdge === 'left') {
         if (x < 606) {
           x += speed * dt;
         } else {
           x = -101;
         }
       } else {
-        if (x > -101) {
-          // eslint-disable-line no-lonely-if
+        if (x > -101) { // eslint-disable-line no-lonely-if
           x -= speed * dt;
         } else {
           x = 707;
@@ -237,7 +233,7 @@ const GameEnemy = (() => {
      * @param {number} speed
      */
     increaseSpeed(speed) {
-      const newSpeed = this.speed >= speed ? this.speed + 10 : speed;
+      const newSpeed = (this.speed >= speed) ? this.speed + 10 : speed;
       setSpeed(this, newSpeed);
     }
 
@@ -276,9 +272,9 @@ const GamePlayer = (() => {
   const setLives = (instance, modLives) => {
     const { lives, maxLives } = _(instance);
     _(instance).lives =
-      (modLives < 0 && lives > 0) || (modLives > 0 && lives < maxLives)
-        ? lives + modLives
-        : lives;
+      ((modLives < 0 && lives > 0)
+      || (modLives > 0 && lives < maxLives))
+        ? lives + modLives : lives;
   };
 
   /**
@@ -298,23 +294,22 @@ const GamePlayer = (() => {
   const movementHandlerInput = (instance, direction) => {
     const { steps, maxCoords, isDead } = _(instance);
     const { x, y } = instance;
-    if (isDead || game.isLocked) {
-      // eslint-disable-line no-use-before-define
+    if (isDead || game.isLocked) { // eslint-disable-line no-use-before-define
       return;
     }
 
     switch (direction) {
-      case "left":
-        parent.setX(instance, Math.max(x - steps.x, maxCoords.minX));
+      case 'left':
+        parent.setX(instance, Math.max((x - steps.x), maxCoords.minX));
         break;
-      case "right":
-        parent.setX(instance, Math.min(x + steps.x, maxCoords.maxX));
+      case 'right':
+        parent.setX(instance, Math.min((x + steps.x), maxCoords.maxX));
         break;
-      case "up":
-        parent.setY(instance, Math.max(y - steps.y, maxCoords.minY));
+      case 'up':
+        parent.setY(instance, Math.max((y - steps.y), maxCoords.minY));
         break;
-      case "down":
-        parent.setY(instance, Math.min(y + steps.y, maxCoords.maxY));
+      case 'down':
+        parent.setY(instance, Math.min((y + steps.y), maxCoords.maxY));
         break;
       default:
         break;
@@ -327,28 +322,24 @@ const GamePlayer = (() => {
      */
     constructor(sprite) {
       super(parent);
-      const privateProps = {
-        // private properties for Player class
+      const privateProps = { // private properties for Player class
         maxLives: 3,
         lives: 3,
         isDead: false,
-        maxCoords: {
-          // to limit area of player movement
+        maxCoords: { // to limit area of player movement
           minX: 0,
           minY: -10,
           maxX: 404,
-          maxY: 405
+          maxY: 405,
         },
-        steps: {
-          // for player movements
+        steps: { // for player movements
           x: 101,
-          y: 83
+          y: 83,
         },
-        spriteAnimate: {
-          // object with the player images
+        spriteAnimate: { // object with the player images
           win: sprite.win,
-          lose: sprite.lose
-        }
+          lose: sprite.lose,
+        },
       };
       // stores private properties for class instance
       priv.set(this, privateProps);
@@ -357,12 +348,12 @@ const GamePlayer = (() => {
       this.reset();
 
       // adds listener for arrow keyup event to manage movement of the player
-      document.addEventListener("keyup", event => {
+      document.addEventListener('keyup', (event) => {
         const allowedKeys = {
-          37: "left",
-          38: "up",
-          39: "right",
-          40: "down"
+          37: 'left',
+          38: 'up',
+          39: 'right',
+          40: 'down',
         };
         movementHandlerInput(this, allowedKeys[event.keyCode]);
       });
@@ -411,13 +402,13 @@ const GamePlayer = (() => {
       const { sprite } = this;
       // chooses which image will be used in animation
       const spriteAnimated =
-        result === "win" ? this.spriteAnimate.win : this.spriteAnimate.lose;
+        (result === 'win') ? this.spriteAnimate.win : this.spriteAnimate.lose;
 
       // starts animation
       const interval = setInterval(() => {
         parent.setSprite(
           this,
-          this.sprite === spriteAnimated ? sprite : spriteAnimated
+          (this.sprite === spriteAnimated) ? sprite : spriteAnimated,
         );
       }, 100);
 
@@ -461,7 +452,7 @@ const GameLevel = (() => {
    * @description sets level property
    * @param {object} instance
    */
-  const setLevel = instance => {
+  const setLevel = (instance) => {
     _(instance).level += 1;
   };
 
@@ -488,7 +479,7 @@ const GameLevel = (() => {
    * @param {object} instance
    * @param {number} level
    */
-  const calculateEnemiesNumberRange = level => {
+  const calculateEnemiesNumberRange = (level) => {
     const enemiesNumberRange = [];
     let min;
     let max;
@@ -520,7 +511,7 @@ const GameLevel = (() => {
    * @param {object} instance
    * @param {number} level
    */
-  const calculateEnemiesSpeedRange = level => {
+  const calculateEnemiesSpeedRange = (level) => {
     const enemiesSpeedRange = [];
     let min;
     let max;
@@ -554,7 +545,7 @@ const GameLevel = (() => {
       const privateProps = {
         level: initLevel,
         enemiesNumberRange: calculateEnemiesNumberRange(initLevel),
-        enemiesSpeedRange: calculateEnemiesSpeedRange(initLevel)
+        enemiesSpeedRange: calculateEnemiesSpeedRange(initLevel),
       };
 
       // stores private properties for class instance
@@ -607,8 +598,8 @@ const GamePanel = (() => {
    * @param {string} url
    */
   const setSpriteSrc = (instance, url) => {
-    _(instance).spriteImages.forEach(spriteImage => {
-      spriteImage.setAttribute("src", url);
+    _(instance).spriteImages.forEach((spriteImage) => {
+      spriteImage.setAttribute('src', url);
     });
   };
 
@@ -625,10 +616,10 @@ const GamePanel = (() => {
    * @description closes modal and removes listener for keyup event
    * @param {object} instance
    */
-  const closeModal = instance => {
-    _(instance).introModal.classList.remove("show-modal");
-    _(instance).resultModal.classList.remove("show-modal");
-    document.removeEventListener("keyup", _(instance).modalKeyHandler);
+  const closeModal = (instance) => {
+    _(instance).introModal.classList.remove('show-modal');
+    _(instance).resultModal.classList.remove('show-modal');
+    document.removeEventListener('keyup', _(instance).modalKeyHandler);
   };
 
   /**
@@ -638,11 +629,11 @@ const GamePanel = (() => {
    */
   const startOptionsHandler = (instance, key) => {
     const { sprites, spriteIndex } = _(instance);
-    if (key === "enter") {
+    if (key === 'enter') {
       closeModal(instance);
       game.startGame(sprites[spriteIndex]); // eslint-disable-line no-use-before-define
-    } else if (key === "space") {
-      const index = spriteIndex === sprites.length - 1 ? 0 : spriteIndex + 1;
+    } else if (key === 'space') {
+      const index = (spriteIndex === sprites.length - 1) ? 0 : spriteIndex + 1;
       setSpriteSrc(instance, sprites[index].normal);
       setSpriteIndex(instance, index);
     }
@@ -653,52 +644,50 @@ const GamePanel = (() => {
       // private properties for Panel class
       const privateProps = {
         // DOM elements for modals managment
-        resultModal: document.querySelector("#result-modal"),
-        introModal: document.querySelector("#intro-modal"),
-        title: document.querySelector(".title"),
-        levelResult: document.querySelector(".level-result"),
-        livesResult: document.querySelector(".lives-result"),
-        spriteImages: document.querySelectorAll(".sprite img"),
+        resultModal: document.querySelector('#result-modal'),
+        introModal: document.querySelector('#intro-modal'),
+        title: document.querySelector('.title'),
+        levelResult: document.querySelector('.level-result'),
+        livesResult: document.querySelector('.lives-result'),
+        spriteImages: document.querySelectorAll('.sprite img'),
 
-        sprites: [
-          {
-            // sprites - images urls for the players
-            normal: "img/char-boy.png",
-            lose: "img/char-boy-lose.png",
-            win: "img/char-boy-win.png"
-          },
-          {
-            normal: "img/char-cat-girl.png",
-            lose: "img/char-cat-girl-lose.png",
-            win: "img/char-cat-girl-win.png"
-          },
-          {
-            normal: "img/char-horn-girl.png",
-            lose: "img/char-horn-girl-lose.png",
-            win: "img/char-horn-girl-win.png"
-          },
-          {
-            normal: "img/char-pink-girl.png",
-            lose: "img/char-pink-girl-lose.png",
-            win: "img/char-pink-girl-win.png"
-          },
-          {
-            normal: "img/char-princess-girl.png",
-            lose: "img/char-princess-girl-lose.png",
-            win: "img/char-princess-girl-win.png"
-          }
+        sprites: [{ // sprites - images urls for the players
+          normal: 'img/char-boy.png',
+          lose: 'img/char-boy-lose.png',
+          win: 'img/char-boy-win.png',
+        },
+        {
+          normal: 'img/char-cat-girl.png',
+          lose: 'img/char-cat-girl-lose.png',
+          win: 'img/char-cat-girl-win.png',
+        },
+        {
+          normal: 'img/char-horn-girl.png',
+          lose: 'img/char-horn-girl-lose.png',
+          win: 'img/char-horn-girl-win.png',
+        },
+        {
+          normal: 'img/char-pink-girl.png',
+          lose: 'img/char-pink-girl-lose.png',
+          win: 'img/char-pink-girl-win.png',
+        },
+        {
+          normal: 'img/char-princess-girl.png',
+          lose: 'img/char-princess-girl-lose.png',
+          win: 'img/char-princess-girl-win.png',
+        },
         ],
-        spriteIndex: 0
+        spriteIndex: 0,
       };
 
       // stores private properties for class instance
       priv.set(this, privateProps);
 
       // listener for enter/space keyup event
-      this.modalKeyHandler = event => {
+      this.modalKeyHandler = (event) => {
         const allowedKeys = {
-          32: "space",
-          13: "enter"
+          32: 'space',
+          13: 'enter',
         };
         startOptionsHandler(this, allowedKeys[event.keyCode]);
       };
@@ -736,20 +725,19 @@ const GamePanel = (() => {
      * @param {number} level
      * @param {number} lives
      */
-    render(level, lives) {
-      // eslint-disable-line class-methods-use-this
-      ctx.font = "20px Ubuntu";
-      ctx.fillStyle = "white";
+    render(level, lives) { // eslint-disable-line class-methods-use-this
+      ctx.font = '20px Ubuntu';
+      ctx.fillStyle = 'white';
       ctx.fillText(`Level: ${level}/12`, 10, 33);
-      ctx.fillText("Lives:", 150, 33);
+      ctx.fillText('Lives:', 150, 33);
       const step = 35;
       for (let i = 0; i < lives; i++) {
         ctx.drawImage(
-          Resources.get("img/Heart.png"),
-          205 + step * i,
+          Resources.get('img/Heart.png'),
+          205 + (step * i),
           0,
           30,
-          50
+          50,
         );
       }
     }
@@ -762,24 +750,22 @@ const GamePanel = (() => {
      * @param {object} gems // TODO for future use
      * @param {number} points // TODO for future use
      */
-    displayResultModal(success, level, lives, gems, points) {
-      // eslint-disable-line no-unused-vars
-      document.addEventListener("keyup", this.modalKeyHandler);
-      const title = success
-        ? "Congratulations, you won!"
-        : "Unfortunately, you lost!";
+    displayResultModal(success, level, lives, gems, points) { // eslint-disable-line no-unused-vars
+      document.addEventListener('keyup', this.modalKeyHandler);
+      const title = (success)
+        ? 'Congratulations, you won!' : 'Unfortunately, you lost!';
       this.title.textContent = title;
       this.levelResult.textContent = level;
       this.livesResult.textContent = lives;
-      this.resultModal.classList.add("show-modal");
+      this.resultModal.classList.add('show-modal');
     }
 
     /**
      * @description displays intro modal
      */
     displayIntroModal() {
-      document.addEventListener("keyup", this.modalKeyHandler);
-      this.introModal.classList.add("show-modal");
+      document.addEventListener('keyup', this.modalKeyHandler);
+      this.introModal.classList.add('show-modal');
     }
   }
   return Panel;
@@ -859,12 +845,13 @@ const ArcadeGame = (() => {
   const getRandomInt = (min, max) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
+
   /**
    * @description renders game entities (player and enemies)
    * @param {object} instance
    */
-  const renderEntities = instance => {
-    _(instance).enemies.forEach(enemy => {
+  const renderEntities = (instance) => {
+    _(instance).enemies.forEach((enemy) => {
       enemy.render();
     });
     _(instance).player.render();
@@ -875,7 +862,7 @@ const ArcadeGame = (() => {
    * @param {object} instance
    */
   const updateEntities = (instance, dt) => {
-    _(instance).enemies.forEach(enemy => {
+    _(instance).enemies.forEach((enemy) => {
       enemy.update(dt);
     });
     _(instance).player.update();
@@ -885,13 +872,13 @@ const ArcadeGame = (() => {
    * @description creates enemies
    * @param {object} instance
    */
-  const createEnemies = instance => {
+  const createEnemies = (instance) => {
     const { enemies, level } = _(instance);
     const createdEnemies = [];
     const { enemiesNumberRange, enemiesSpeedRange } = level; // used for drawing speed and number of enemies
     const enemiesNumber = getRandomInt(
       enemiesNumberRange[0],
-      enemiesNumberRange[1]
+      enemiesNumberRange[1],
     );
     const newEnemiesNum = enemiesNumber - enemies.length; // number of new enemies which must be added
     let hasOppositeDirection = false; // used for setting direction of movement
@@ -911,7 +898,7 @@ const ArcadeGame = (() => {
         enemyTrack = getRandomInt(1, 3);
       }
 
-      const startEdge = hasOppositeDirection ? "right" : "left";
+      const startEdge = hasOppositeDirection ? 'right' : 'left';
 
       createdEnemies.push(new GameEnemy(enemyTrack, enemySpeed, startEdge));
     }
@@ -924,16 +911,13 @@ const ArcadeGame = (() => {
    * @description checks if there is a collision between the player and the enemies
    * @param {object} instance
    */
-  const checkCollision = instance => {
+  const checkCollision = (instance) => {
     const { player, enemies } = _(instance);
-    for (const enemy of enemies) {
-      // eslint-disable-line no-restricted-syntax
-      if (
-        player.getEdge("left") <= enemy.getEdge("right") &&
-        player.getEdge("right") >= enemy.getEdge("left") &&
-        player.getEdge("top") <= enemy.getEdge("bottom") &&
-        player.getEdge("bottom") >= enemy.getEdge("top")
-      ) {
+    for (const enemy of enemies) { // eslint-disable-line no-restricted-syntax
+      if (player.getEdge('left') <= enemy.getEdge('right') &&
+        player.getEdge('right') >= enemy.getEdge('left') &&
+        player.getEdge('top') <= enemy.getEdge('bottom') &&
+        player.getEdge('bottom') >= enemy.getEdge('top')) {
         return true;
       }
     }
@@ -944,7 +928,7 @@ const ArcadeGame = (() => {
    * @description checks if player is dead or lost life only ;-)
    * @param {object} instance
    */
-  const checkIsDaed = instance => {
+  const checkIsDaed = (instance) => {
     let isDead = false;
     const { player } = _(instance);
     player.die();
@@ -953,7 +937,7 @@ const ArcadeGame = (() => {
     if (player.lives === 0) {
       isDead = true;
     } else {
-      player.spriteAnimetion("lose");
+      player.spriteAnimetion('lose');
     }
     return isDead;
   };
@@ -962,7 +946,7 @@ const ArcadeGame = (() => {
    * @description checks if the player has reached the goal
    * @param {object} instance
    */
-  const checkGoal = instance => {
+  const checkGoal = (instance) => {
     const { player } = _(instance);
     let isGoal = false;
     if (player.y === player.maxCoords.minY) {
@@ -975,18 +959,18 @@ const ArcadeGame = (() => {
    * @description increases the level
    * @param {object} instance
    */
-  const increaseLevel = instance => {
+  const increaseLevel = (instance) => {
     const { level, player, enemies } = _(instance);
     level.update();
 
     // increases speed of existing enemies
-    enemies.forEach(enemy => {
+    enemies.forEach((enemy) => {
       const speedRange = level.enemiesNumberRange;
       enemy.increaseSpeed(getRandomInt(speedRange[0], speedRange[1]));
     });
 
     // animates the player
-    player.spriteAnimetion("win");
+    player.spriteAnimetion('win');
     resetRound(instance, true); // eslint-disable-line no-use-before-define
   };
 
@@ -1014,7 +998,7 @@ const ArcadeGame = (() => {
    * @description displays game intro to show game tutorial and enable game start
    * @param {object} instance
    */
-  const startIntro = instance => {
+  const startIntro = (instance) => {
     _(instance).panel.displayIntroModal();
   };
 
@@ -1022,7 +1006,7 @@ const ArcadeGame = (() => {
    * @description stops the game and resets its props
    * @param {object} instance
    */
-  const stopGame = instance => {
+  const stopGame = (instance) => {
     setIsStarted(instance, false);
     setEnemies(instance, []);
     setPlayer(instance, null);
@@ -1036,8 +1020,8 @@ const ArcadeGame = (() => {
   const endGame = (instance, result) => {
     const { enemies, player, level, panel } = _(instance);
     // const success = (result === 'win') ? true : false;
-    const success = result === "win";
-    enemies.forEach(enemy => {
+    const success = result === 'win';
+    enemies.forEach((enemy) => {
       enemy.stop();
     });
     player.spriteAnimetion(result);
@@ -1057,7 +1041,7 @@ const ArcadeGame = (() => {
         level: null,
         player: null,
         maxLevel: 12,
-        enemies: []
+        enemies: [],
       };
       // stores private properties for class instance
       priv.set(this, privateProps);
@@ -1114,14 +1098,14 @@ const ArcadeGame = (() => {
       if (checkCollision(this)) {
         setIsLocked(this, true);
         if (checkIsDaed(this)) {
-          endGame(this, "lose");
+          endGame(this, 'lose');
         } else {
           resetRound(this, false);
         }
       } else if (checkGoal(this)) {
         setIsLocked(this, true);
         if (this.level.level === this.maxLevel) {
-          endGame(this, "win");
+          endGame(this, 'win');
         } else {
           increaseLevel(this);
         }
@@ -1144,3 +1128,97 @@ const ArcadeGame = (() => {
 })();
 // creates game instance - it controls game initialization itself
 const game = new ArcadeGame();
+
+
+export const socketManager = (() => {
+  const priv = new WeakMap();
+
+  const _ = instance => priv.get(instance);
+
+  const setSocket = (instance, socket) => {
+    _(instance).socket = socket;
+  }
+
+  class Socket {
+    constructor() {
+      const privProps = {
+        socket = undefined,
+      };
+  
+      priv.set(this, privProps);
+    }
+
+    // get socket() {
+    //   return _(this).socket;
+    // }
+  
+    static getSocket() {
+      if(!_(this).socket) {
+        setSocket(this, io());
+      }
+  
+      return _(this).socket;
+    }
+  }
+
+  return Socket;
+})();
+
+
+// ***********************************************************
+
+class Socket {
+  socket = undefined;
+
+  static getSocket() {
+    if (socket === undefined) {
+      socket = io();
+    }
+    return socket;
+  }
+}
+
+// import io from 'io';
+
+export default Socket = (() => {
+  let socket;
+  let instance;
+
+  class SocketConnection {
+    constructor() {
+      if(!instance) {
+        instance = this;
+        socket = io();
+      }
+
+      return instance;
+    }
+  
+    static get() {
+      if(!instance) {
+        instance = new Socket();
+      }
+
+      return socket;
+    }
+  }
+
+  return SocketConnection;
+})();
+
+import Socket from 'dupa';
+
+
+export default getSocket = (() => {
+  let socket;
+
+  return () => {
+    if(!socket) {
+      socket = io();
+    }
+
+    return socket;
+  } 
+})();
+
+import getSocket from 'dupa';

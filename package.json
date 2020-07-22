@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alemikolo/arcadegame.git"
+    "url": "git+https://github.com/aleksanderfret/arcadegame.git"
   },
   "author": "Aleksander Fret",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alemikolo/arcadegame/issues"
+    "url": "https://github.com/aleksanderfret/arcadegame/issues"
   },
-  "homepage": "https://github.com/alemikolo/arcadegame#readme",
+  "homepage": "https://github.com/aleksanderfret/arcadegame#readme",
   "browserslist": [
     "since 2015",
     "IE > 8"
